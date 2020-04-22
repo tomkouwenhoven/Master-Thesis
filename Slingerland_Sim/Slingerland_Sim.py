@@ -19,15 +19,21 @@ go_probabilities = np.full(num_agents, .1, dtype=float)
 # print(go_probabilities)
 
 def run_generation(_go_probs): #-- run for number of rounds, with entire generation
-    # print(go_probs)
+    # print(_go_probs)
+    
     
     group = []
     for i in range(num_agents):
         group.append(Agent(_name = i, _gossip_prob = _go_probs[i]))
+    
+    # print(f'Before mutation: {[a.gossip_prob for a in group]}')
+    # print([a.gossip_prob for a in group])
 
     total_i_fitness = np.zeros((n_rounds, num_agents))
     total_s_fitness = np.zeros((n_rounds, num_agents))
     total_fitness = np.zeros((n_rounds, num_agents))
+
+    N_EVENTS = 0
 
     for r in range(n_rounds):
         # print(f'---------------------- Round number: {r} ----------------------')
@@ -37,36 +43,31 @@ def run_generation(_go_probs): #-- run for number of rounds, with entire generat
 
         #-- All agents of this generation socialize for n_rounds
         sampled_agents = random.sample(group, random.randint(1, num_agents))
-        # grooming_agents = [agent for agent in sampled_agents if random.uniform(0,1) > agent.gossip_prob]
-        # gossiping_agents = [agent for agent in sampled_agents if agent not in grooming_agents]
-
         grooming_agents = []
         gossiping_agents = []
 
         for a in sampled_agents:
         #--determine whether an agents goes gossiping or grooming
             if random.uniform(0,1) > a.gossip_prob: 
-                groom(a, group)
+                groom(a, group, (f'event: {N_EVENTS}')) #-- GROUP?
                 grooming_agents.append(a)
             else:
-                gossip(a, group)
+                gossip(a, group, (f'event: {N_EVENTS}')) #-- GROUP?
                 gossiping_agents.append(a)
+            N_EVENTS += 1
         
         # g_names = [agent.name for agent in gossiping_agents]
         # names = [agent.name for agent in grooming_agents]
-        # print(f'Want to groom:      {names} \nWant to gossip:     {g_names}')
-
-        # gossip_all(gossiping_agents, group)
-        # groom_all(grooming_agents, group)
-        
+        # print(f'Want to groom:      {names} \nWant to gossip:     {g_names}'))
 
         # -- Other
         # for i, agent in enumerate(group):
         #     total_s_fitness[r][i] = agent.calc_social_fitness()
         #     total_i_fitness[r][i] = agent.calc_info_fitness()
-        #     total_fitness[r][i] = agent.calc_fitness()
+        #     total_fitness[r][i] = agent.calc_fitness()s
             # print(f'agent: :{agent.name} memory: {agent.memory}')
-            # print(f'agent: {agent.name}, fitness: {agent.fitness}, groom events: {agent.groom_events}, Gossip events: {agent.gossip_events}')
+            # agent.calc_fitness()
+            # print(f'agent: {agent.name}, fitness: {agent.fitness}, memory: {agent.memory}, groom events: {agent.groom_members_list}, Gossip events: {agent.gossip_members_list}')
     # fitness_agent_list = list(zip(group, total_fitness[-1])) #-- list (agent, fitness)
 
 
@@ -75,15 +76,18 @@ def run_generation(_go_probs): #-- run for number of rounds, with entire generat
     sorted_fitness = sorted(fitness_agent_list, key = lambda x: x[1], reverse=True) #-- list sorted from high fitness to low fitness
     best, rest, worst = select_fittest(sorted_fitness, 0.1) #-- select the best and worst 5 % of the agents. 
 
-    r_gp_mutated = [reproduce(a, mut_prob = mutation_prob, mut_rate = 5) for a, _ in rest] #-- middle group mutated gossip probabilities
-    b_gp_mutated1 = [reproduce(a, mut_prob = mutation_prob, mut_rate = 5) for a, _ in best] #-- high group mutated gossip probabilities for first baby 
-    b_gp_mutated2 = [reproduce(a, mut_prob = mutation_prob, mut_rate = 5) for a, _ in best] #-- high group mutated gossip probabilities for second baby
+
     
+    r_gp_mutated = [reproduce(a, mut_prob = mutation_prob) for a, _ in rest] #-- middle group mutated gossip probabilities
+    b_gp_mutated1 = [reproduce(a, mut_prob = mutation_prob) for a, _ in best] #-- best group mutated gossip probabilities for first baby 
+    b_gp_mutated2 = [reproduce(a, mut_prob = mutation_prob) for a, _ in best] #-- best group mutated gossip probabilities for second baby
+   
+
     go_probs = [a.gossip_prob for a in group]
     # print(f'Before mutation: {go_probs}')
 
     go_p_mutated = b_gp_mutated1 + b_gp_mutated2 + r_gp_mutated #-- middle group only gets one child, high group gets two childs. 
-
+    # print(f'After mutation: {go_p_mutated}')
     # return fitness_agent_list, go_p_mutated, go_probs
     return go_p_mutated
 
@@ -94,11 +98,10 @@ avg_gen_go_prob = []
 # mutated_go = [0,0,0,0,0,0,0,0,0,0]
 for i in range(n_generations):
     print(f'Generation: {i}')
-    # print(f'Before: {mutated_go}')
     if i == 0:
         # g_fitness_agent, mutated_go, go_probs = run_generation(go_probabilities)
         mutated_go = run_generation(go_probabilities)
-        # print(mutated_go)
+        
     else:
         # g_fitness_agent, mutated_go, go_probs = run_generation(mutated_go)
         mutated_go = run_generation(mutated_go)
@@ -131,5 +134,5 @@ plt.title(f"Average gossip probability, n_agents:{num_agents}, mutation prob:{mu
 plt.grid()
 
 
-# plt.savefig(f'/Users/Tom/Desktop/Thesis/Slingerland_Sim/output/17-0_avg_gp_{num_agents}-{n_generations}-{mutation_prob}.png')
+# plt.savefig(f'/Users/Tom/Desktop/Thesis/Slingerland_Sim/output/22-04_avg_gp_{num_agents}-{n_generations}-{mutation_prob}.png')
 plt.show()

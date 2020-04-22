@@ -11,8 +11,8 @@ class Agent:
         self.available = True
         self.groom = False
         self.gossip = False
-        self.groom_events = []
-        self.gossip_events = []
+        self.gossip_members_list = []
+        self.groom_members_list = []
         self.info_fitness = 0 
         self.social_fitness = 0
         self.fitness = 0
@@ -23,15 +23,17 @@ class Agent:
 
     def calc_social_fitness(self):
         
-        gr_fitness = 0
-        for gr_event in self.groom_events:
-            gr_fitness += self.func(len(gr_event))
+        #-- Calculate social fitness acquired through GROOMING
+        sum_gr_fitness = 0
+        for gr_event in self.groom_members_list:
+            sum_gr_fitness += self.func(gr_event)
 
-        go_fitness = 0
-        for go_event in self.gossip_events:
-            go_fitness += self.func(len(go_event))
+        #-- Calculate social fitness acquired through GOSSIPING
+        sum_go_fitness = 0
+        for go_event in self.gossip_members_list:
+            sum_go_fitness += self.func(go_event)
 
-        self.social_fitness = (5 * gr_fitness) + (4 * go_fitness)
+        self.social_fitness = (5 * sum_gr_fitness) + (4 * sum_go_fitness)
         # return self.social_fitness
 
     def func(self, n_people):
