@@ -93,8 +93,10 @@ def observe(observer, event_name):
 
 def reproduce(agent, mut_prob):
         if random.uniform(0,1) <= mut_prob:
-            mutation_rate = random.uniform(1.0, 1.051) #-- maximum of 5% change in gossip prob
-            new_go_probability = agent.gossip_prob * mutation_rate
+            mutation_rate = random.choice([0.05, -0.05])
+            # mutation_rate = random.uniform(0.95, 1.051) #-- maximum of 5% change in gossip prob
+            # new_go_probability = agent.gossip_prob * mutation_rate
+            new_go_probability = agent.gossip_prob + mutation_rate
         # new_go_probability = agent.gossip_prob * (1 + (mutation_rate * direction))
             return new_go_probability
         else:

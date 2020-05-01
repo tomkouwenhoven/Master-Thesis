@@ -6,28 +6,21 @@ import random
 import matplotlib.pyplot as plt
 
 import sys
+import argparse
 
-print (f'The script ran with {sys.argv[1]} agents and for {sys.argv[2]} generations.')
-
-num_agents = int(sys.argv[1])
 n_rounds = 30
-n_generations = int(sys.argv[2])
+n_generations = int(sys.argv[1])
 mutation_prob = .01
 
-
-go_probabilities = np.full(num_agents, .1, dtype=float)
+# go_probabilities = np.full(num_agents, .1, dtype=float)
 # print(go_probabilities)
 
-def run_generation(_go_probs): #-- run for number of rounds, with entire generation
-    # print(_go_probs)
-    
-    
+def run_generation(_go_probs, num_agents): 
+    #-- run for number of rounds, with entire generation of num_agents. After the number of rounds each agent is evaluated and some are allowed to mutate. 
+   
     group = []
     for i in range(num_agents):
         group.append(Agent(_name = i, _gossip_prob = _go_probs[i]))
-    
-    # print(f'Before mutation: {[a.gossip_prob for a in group]}')
-    # print([a.gossip_prob for a in group])
 
     total_i_fitness = np.zeros((n_rounds, num_agents))
     total_s_fitness = np.zeros((n_rounds, num_agents))
@@ -72,67 +65,70 @@ def run_generation(_go_probs): #-- run for number of rounds, with entire generat
 
 
 #-- Evaluation 
+    #-- The fitness of each agents is calculated, sorted and the best & worst 5% are selected.
     fitness_agent_list = [(a, a.calc_fitness()) for a in group]
     sorted_fitness = sorted(fitness_agent_list, key = lambda x: x[1], reverse=True) #-- list sorted from high fitness to low fitness
     best, rest, worst = select_fittest(sorted_fitness, 0.1) #-- select the best and worst 5 % of the agents. 
 
-
-    
+    #-- This is were mutation happens, each agent reproduces a single new gossip probability. 
     r_gp_mutated = [reproduce(a, mut_prob = mutation_prob) for a, _ in rest] #-- middle group mutated gossip probabilities
     b_gp_mutated1 = [reproduce(a, mut_prob = mutation_prob) for a, _ in best] #-- best group mutated gossip probabilities for first baby 
     b_gp_mutated2 = [reproduce(a, mut_prob = mutation_prob) for a, _ in best] #-- best group mutated gossip probabilities for second baby
    
-
-    go_probs = [a.gossip_prob for a in group]
-    # print(f'Before mutation: {go_probs}')
-
     go_p_mutated = b_gp_mutated1 + b_gp_mutated2 + r_gp_mutated #-- middle group only gets one child, high group gets two childs. 
-    # print(f'After mutation: {go_p_mutated}')
-    # return fitness_agent_list, go_p_mutated, go_probs
+
     return go_p_mutated
 
 
-gen_go_probs = np.empty((n_generations, num_agents))
-avg_gen_go_prob = []
+# gen_go_probs = np.empty((n_generations, num_agents))
+# avg_gen_go_prob = []
 
-# mutated_go = [0,0,0,0,0,0,0,0,0,0]
-for i in range(n_generations):
-    print(f'Generation: {i}')
-    if i == 0:
-        # g_fitness_agent, mutated_go, go_probs = run_generation(go_probabilities)
-        mutated_go = run_generation(go_probabilities)
+def run_group(size):
+    go_probabilities = np.full(size, .1, dtype=float)
+
+    gen_go_probs = np.empty((n_generations, size))
+    avg_gen_go_prob = []
+
+    for i in range(n_generations):
+        # print(f'Generation: {i}', sep=' ', end='\r')
+        if i == 0:
+            # g_fitness_agent, mutated_go, go_probs = run_generation(go_probabilities)
+            mutated_go = run_generation(go_probabilities, size)
+            
+        else:
+            # g_fitness_agent, mutated_go, go_probs = run_generation(mutated_go)
+            mutated_go = run_generation(mutated_go, size)
+            # print(go_probs)
+        # print(f'after: {mutated_go}')
+        gen_go_probs[i] = mutated_go #-- array containing the new gossip probabilities of each agent in a single generation
+
         
-    else:
-        # g_fitness_agent, mutated_go, go_probs = run_generation(mutated_go)
-        mutated_go = run_generation(mutated_go)
-        # print(go_probs)
-    # print(f'after: {mutated_go}')
-    gen_go_probs[i] = mutated_go #-- array containing the new gossip probabilities of each agent in a single generation
+        avg_gen_go_prob.append(np.mean(mutated_go))
+    return avg_gen_go_prob[-1]
 
-    
-    avg_gen_go_prob.append(np.mean(mutated_go))
-
+group_last_prob = []
+for i in range(2,200):
+    print(f'Group: {i}', sep=' ', end='\r')
+    group_last_prob.append(run_group(i))
 
 # g_avg_go_prob
 # print(np.mean(gen_go_prob, axis = 1))
 # g_avg_go_prop = np.mean(gen_go_prob, axis = 1)
 
-# # test = simulate_gen()
-
 # #-- Plotting
 fig = plt.figure()
-ax = plt.subplot(111)
-ax.plot(avg_gen_go_prob)
-box = ax.get_position()
-ax.set_position([box.x0, box.y0, box.width * 0.90, box.height])
-ax.legend(labels = list(range(n_generations)), loc='center left', bbox_to_anchor=(1, 0.5))
-
-# plt.title("Fitness per agent")
+plt.plot(group_last_prob, 'bx')
 plt.ylabel("Mean Gossip Probability")
-plt.xlabel("Number of generations")
-plt.title(f"Average gossip probability, n_agents:{num_agents}, mutation prob:{mutation_prob}")
+plt.xlabel("Group size")
+plt.title(f"Average gossip probability per group, mutation prob:{mutation_prob}")
 plt.grid()
-
-
-# plt.savefig(f'/Users/Tom/Desktop/Thesis/Slingerland_Sim/output/22-04_avg_gp_{num_agents}-{n_generations}-{mutation_prob}.png')
+plt.savefig(f'/Users/Tom/Desktop/Thesis/Slingerland_Sim/output/30-04_avg_gp_global-{mutation_prob}-0505.png')
 plt.show()
+
+
+
+# def main(args = None):
+#     parser = argparse()
+
+# if __name__ == "__main__":
+#     main()
