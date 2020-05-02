@@ -22,9 +22,9 @@ def run_generation(_go_probs, num_agents):
     for i in range(num_agents):
         group.append(Agent(_name = i, _gossip_prob = _go_probs[i]))
 
-    total_i_fitness = np.zeros((n_rounds, num_agents))
-    total_s_fitness = np.zeros((n_rounds, num_agents))
-    total_fitness = np.zeros((n_rounds, num_agents))
+    # total_i_fitness = np.zeros((n_rounds, num_agents))
+    # total_s_fitness = np.zeros((n_rounds, num_agents))
+    # total_fitness = np.zeros((n_rounds, num_agents))
 
     N_EVENTS = 0
 
@@ -57,7 +57,7 @@ def run_generation(_go_probs, num_agents):
         # for i, agent in enumerate(group):
         #     total_s_fitness[r][i] = agent.calc_social_fitness()
         #     total_i_fitness[r][i] = agent.calc_info_fitness()
-        #     total_fitness[r][i] = agent.calc_fitness()s
+        #     total_fitness[r][i] = agent.calc_fitness()
             # print(f'agent: :{agent.name} memory: {agent.memory}')
             # agent.calc_fitness()
             # print(f'agent: {agent.name}, fitness: {agent.fitness}, memory: {agent.memory}, groom events: {agent.groom_members_list}, Gossip events: {agent.gossip_members_list}')
@@ -122,7 +122,7 @@ plt.ylabel("Mean Gossip Probability")
 plt.xlabel("Group size")
 plt.title(f"Average gossip probability per group, mutation prob:{mutation_prob}")
 plt.grid()
-plt.savefig(f'/Users/Tom/Desktop/Thesis/Slingerland_Sim/output/30-04_avg_gp_global-{mutation_prob}-0505.png')
+plt.savefig(f'/Users/Tom/Desktop/Thesis/Slingerland_Sim/output/01-05_avg_gp_global-{mutation_prob}-0505.png')
 plt.show()
 
 
