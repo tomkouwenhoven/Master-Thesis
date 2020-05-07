@@ -104,25 +104,47 @@ def run_group(size):
 
         
         avg_gen_go_prob.append(np.mean(mutated_go))
-    return avg_gen_go_prob[-1]
+    return avg_gen_go_prob[-1], avg_gen_go_prob
 
-group_last_prob = []
-for i in range(2,200):
-    print(f'Group: {i}', sep=' ', end='\r')
-    group_last_prob.append(run_group(i))
+groups_last_prob = []
+all_groups_generation_probs = []
+group_sizes = [10, 50, 100, 130, 190]
+# group_sizes = range(2,200)
+for i, size in enumerate(group_sizes):
+    print(f'Group: {size}', sep=' ', end='\r')
+    last_go_prob_group, group_generation_probs = run_group(size)
+    all_groups_generation_probs.append(group_generation_probs)
+    groups_last_prob.append(last_go_prob_group)
+    # print(all_groups_generation_probs)
+    
+# print(all_groups_generation_probs)
 
 # g_avg_go_prob
 # print(np.mean(gen_go_prob, axis = 1))
 # g_avg_go_prop = np.mean(gen_go_prob, axis = 1)
 
-# #-- Plotting
+
+#-- plotting of gossip probability per group
+# fig = plt.figure()
+# plt.plot(groups_last_prob, 'bx')
+# plt.ylabel("Mean Gossip Probability")
+# plt.xlabel("Group size")
+# plt.title(f"Average gossip probability per group, mutation prob:{mutation_prob}")
+# plt.grid()
+# # plt.legend()
+# plt.savefig(f'/Users/Tom/Desktop/Thesis/Slingerland_Sim/output/05-05_avg_gp_global{mutation_prob}-{n_generations}.png')
+# plt.show()
+
+# #-- Plotting of course of gossip probabilities
 fig = plt.figure()
-plt.plot(group_last_prob, 'bx')
+for i, line in enumerate(all_groups_generation_probs):
+    plt.plot(line, label = group_sizes[i])
 plt.ylabel("Mean Gossip Probability")
-plt.xlabel("Group size")
+plt.xlabel("Generation")
 plt.title(f"Average gossip probability per group, mutation prob:{mutation_prob}")
 plt.grid()
-plt.savefig(f'/Users/Tom/Desktop/Thesis/Slingerland_Sim/output/01-05_avg_gp_global-{mutation_prob}-0505.png')
+plt.legend()
+plt.savefig(f'/Users/Tom/Desktop/Thesis/Slingerland_Sim/output/05-05_avg_gp_persize-{mutation_prob}-{n_generations}.png')
 plt.show()
 
 

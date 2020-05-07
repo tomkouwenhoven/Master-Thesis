@@ -8,6 +8,7 @@ class Agent:
         self.name = _name
         self.pro_social = _pro_social
         self.history = {}
+        self.groups = []
 
     def calc_info_fitness(self):
         pass
