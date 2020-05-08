@@ -18,4 +18,4 @@ Provide arbitrary starting parameters in the following way:
 - ```--ngroups 5``` (Make sure that it can equally devide the number of agents)
 - ```--ngenerations 1```
 
-
+Or run ```python __main__.py --help``` to see the options available.
