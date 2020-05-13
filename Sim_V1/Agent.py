@@ -9,12 +9,15 @@ class Agent:
         self.pro_social = _pro_social
         self.history = {}
         self.groups = []
+        self.available = True
+        self.social_fitness = 0
 
     def calc_info_fitness(self):
         pass
 
     def calc_social_fitness(self):
-        pass
+        self.social_fitness = len(self.groups)
+        
 
     def func(self, n_people):
         pass
