@@ -14,26 +14,26 @@ import random
 
 from matplotlib import pyplot as plt
 
-
+SELECTION = True
 GROUP_REJECTION = .2
-MUTATION_PROB = .2
-SELECTION = False
+MUTATION_PROB = .1
 
 def socialize(social_agent, out_group, population):
+    # print()
     # print(f"{social_agent.name} wants to be prosocial, group: {social_agent.groups[0]}")
+
     
     if out_group:
         #-- the other agents can not be in any of the groups that the social agent is part of. 
 
-        # print("out group socializing")
-
         #-- groups agent 1= [1,2]      agent 2= [3, 5, 2]      agent 3= [3,4,5]
         other_agents = [agent for agent in population if not any(group_number in agent.groups for group_number in social_agent.groups) and agent.available]
+        # print(f'others: {[(a.name, a.groups) for a in other_agents]}')
         if other_agents:
             #-- there must be some agents out group before you can socialize with them 
             other = random.choice(other_agents)    
             
-            # print(f"agent {social_agent.name} with {other.name}")
+            # print(f"out group socializing agent {social_agent.name} with {other.name} from group: {other.groups[0]}")
 
             social_agent.available = False
             other.available = False
@@ -44,12 +44,13 @@ def socialize(social_agent, out_group, population):
 
     else: 
         #-- an agent plays save, and communicates with in group members. 
-        # print("in group socializing")
+
         other_agents = [agent for agent in population if any(group_number in social_agent.groups for group_number in agent.groups) and agent is not social_agent and agent.available]
+        # print(f'others: {[(a.name, a.groups) for a in other_agents]}')
         if other_agents:
             other = random.choice(other_agents)
 
-            # print(f"agent {social_agent.name} with {other.name}")
+            # print(f"in group socializing agent {social_agent.name} with {other.name} from group: {other.groups[0]}")
 
             social_agent.available = False
             other.available = False
@@ -58,37 +59,73 @@ def socialize(social_agent, out_group, population):
             social_agent.history[other.groups[0]] = social_agent.history[other.groups[0]] + 1 if other.groups[0] in social_agent.history else 1
             other.history[social_agent.groups[0]] = other.history[social_agent.groups[0]] + 1 if social_agent.groups[0] in other.history else 1
 
-def check_groups(args, population, groups):
-    
-    # print(np.append(groups[0], population[0]))
+def regroup_agents(args, population, groups):
+    #-- This function checks for each infividual agent to which groups he belongs. He can be added to a group, stay in his groups or be removed from one
+
     for agent in population:
         added = False
-        
+
         for key in agent.history:
-            # print(agent.name, key, len(groups[key]))
             group_acceptance = len(groups[key]) / 2 #-- The number of agents of a group should you have spoken before you get accepted into a group 
+            
             if agent.history[key] >= group_acceptance and key not in agent.groups:
                 agent.groups.append(key) #-- add to agent's personal list
-                groups[key].append(agent) #-- add to general group list
-                added = True    
-        
-        
-        #-- THis can be done quicker with random.choice
-        #-- you can not become rejected from your innate group
+                added = True
+
         new_groups = [group for group in agent.groups[1:] if agent.history[group] >= group_acceptance]
         if new_groups and not added: #-- can only be rejected if you are not adding new groups
             if random.uniform(0,1) <= GROUP_REJECTION:
                 #-- an agent is deleted from a random group
+                
                 remove_group = random.choice(new_groups) 
 
+                # print(f'going to remove {agent.name} from {remove_group}')
                 agent.groups.remove(remove_group) #-- remove from agent's personal list
                 del agent.history[remove_group] #-- remove from agent's history
 
-                groups[remove_group].remove(agent) #-- remove from general group list
+
+def split_to_groups(args, population):
+    groups = {}
+    for agent in population:
+        for group in agent.groups:
+            if group in groups.keys():
+                groups[group].append(agent)
+            else:
+                    groups[group] = [agent]    
+
+    return groups
+
+# def check_groups(args, population, groups):
+    
+#     # print(np.append(groups[0], population[0]))
+#     for agent in population:
+#         added = False
+        
+#         for key in agent.history:
+#             # print(agent.name, key, len(groups[key]))
+#             group_acceptance = len(groups[key]) / 2 #-- The number of agents of a group should you have spoken before you get accepted into a group 
+#             if agent.history[key] >= group_acceptance and key not in agent.groups:
+#                 agent.groups.append(key) #-- add to agent's personal list
+#                 groups[key].append(agent) #-- add to general group list
+#                 added = True    
+        
+#         #-- This can be done quicker with random.choice
+#         #-- you can not become rejected from your innate group
+#         new_groups = [group for group in agent.groups[1:] if agent.history[group] >= group_acceptance]
+#         if new_groups and not added: #-- can only be rejected if you are not adding new groups
+#             if random.uniform(0,1) <= GROUP_REJECTION:
+#                 #-- an agent is deleted from a random group
+#                 remove_group = random.choice(new_groups) 
+
+#                 agent.groups.remove(remove_group) #-- remove from agent's personal list
+#                 del agent.history[remove_group] #-- remove from agent's history
+
+#                 groups[remove_group].remove(agent) #-- remove from general group list
+
+#     # return groups
 
 def run_round(args, population, groups):
     #-- runs a single round where agents can engage with each other. 
-
     for agent in population:
         if agent.available: #-- an agents can only socialize when he is not already socializing. 
             # print([(a.name, a.available) for a in population])
@@ -99,24 +136,87 @@ def run_round(args, population, groups):
                 #-- socialize in group
                 socialize(social_agent = agent, out_group = False, population = population)
     
-    check_groups(args, population, groups)
+    regroup_agents(args, population, groups) #-- checks for each agent their INTERNAL history and updates to which groups he belongs
+    groups = split_to_groups(args, population) #-- checks the GENERAL groups in the population
+    # print()
+    # print([(a.name, a.history, a.groups) for a in population])
+
+    # check_groups(args, population, groups)
     
     for agent in population:
         agent.available = True
         agent.calc_social_fitness()
+
+    # for key in groups:
+    #     print(f'group {key}: {[a.name for a in groups[key]]}')
+    
+    return groups
+
+def generate_population(args, new_phenotypes, new_sim):
+    population = []
+
+    if new_sim:
+        for i in range(args.nagents):
+            population.append(Agent(_name = i, _pro_social = args.prosocial, _groups = (i % args.ngroups)))
+        
+        # print([a.groups for a in population])
+        groups = split_to_groups(args, population)
+
+    else:
+        groups_phenotypes, ps_phenotypes = list(zip(*new_phenotypes))
+        for i in range(args.nagents):
+            population.append(Agent(_name = i, _pro_social = ps_phenotypes[i], _groups = groups_phenotypes[i]))
+
+        # print([a.groups for a in population])
+        groups = split_to_groups(args, population)
+        
+    
+
+
+
+    # if new_sim:
+    #     #-- first sim
+    #     groups = np.split(np.array(population), args.ngroups)
+    #     groups = np.array(groups).tolist()
+
+    #     for i, group in enumerate(groups):
+    #         for agent in group:
+    #             agent.groups.append(i)
+
+    # else:
+    #     #-- not first sim
+    #     groups_phenotypes, ps_phenotypes = list(zip(*new_phenotypes))
+
+    #     for i, agent in enumerate(population):
+    #         #-- assign the phenotypes to the agents
+    #         agent.pro_social = ps_phenotypes[i]
+    #         agent.groups.append(groups_phenotypes[i])
+    #     # print([(a.groups[0], a.pro_social) for a in population])
+
+    #     sorted_population = sorted(population, key=lambda x: x.groups[0])
+    #     # print(f'new population: {[(a.groups[0], a.pro_social) for a in sorted_population]}')
+
+    #     groups = np.split(np.array(sorted_population), args.ngroups)
+    #     groups = np.array(groups).tolist()
+    
+    
+
+    
+    # print(f'starting group sizes: {[len(groups[key]) for key in groups]}')
+
+    return population, groups    
 
 def run_generation(args, population, groups, selection):
     #-- run a generation of nrounds returns the new pro sociality ratings 
     group_sizes = np.zeros((args.ngroups, args.nrounds))
     
     for r in range(args.nrounds):
-        # print(f'Round: {r}', sep=' ', end='\r')
-        # print(f"\n----------------- {r} -----------------")
+        #-- run the social rounds
+        # print(f"round {r}")
+        gen_groups = run_round(args, population, groups)
         
-        run_round(args, population, groups)
-        
-        for i, group in enumerate(groups):
-            group_sizes[i][r] = len(group)
+        for key in gen_groups:
+            group_sizes[key][r] = len(gen_groups[key])
     
         random.shuffle(population) #-- shuffle the population so that there is no ordering effect
 
@@ -137,40 +237,9 @@ def run_generation(args, population, groups, selection):
         # print(f'agent fitness, pro-social: {[(a.groups[0], a.social_fitness, a.pro_social) for a in population]}\n')
         new_phenotypes = reproduce(agent_list = population, mut_prob = .1)
     
+    # print(f'Ending group sizes: {[len(groups[key]) for key in groups]}')
+    # print(f'Phenotypes: {new_phenotypes}')
     return group_sizes, new_phenotypes
-
-def generate_population(args, new_phenotypes, new_sim):
-    population = []
-    
-    for i in range(args.nagents):
-        population.append(Agent(_name = i, _pro_social = args.prosocial))
-
-    if new_sim:
-        #-- first sim
-        groups = np.split(np.array(population), args.ngroups)
-        groups = np.array(groups).tolist()
-
-        for i, group in enumerate(groups):
-            for agent in group:
-                agent.groups.append(i)
-
-    else:
-        #-- not first sim
-        groups_phenotypes, ps_phenotypes = list(zip(*new_phenotypes))
-
-        for i, agent in enumerate(population):
-            #-- assign the phenotypes to the agents
-            agent.pro_social = ps_phenotypes[i]
-            agent.groups.append(groups_phenotypes[i])
-        # print([(a.groups[0], a.pro_social) for a in population])
-
-        sorted_population = sorted(population, key=lambda x: x.groups[0]) 
-        # print([(a.groups[0], a.pro_social) for a in sorted_population])
-
-        groups = np.split(np.array(sorted_population), args.ngroups)
-        groups = np.array(groups).tolist()
-
-    return population, groups
 
 def run_all(args):
     
@@ -182,23 +251,24 @@ def run_all(args):
         print(f'\nGeneration {num_gen}')
         if num_gen == 0:
             population, groups = generate_population(args, [], new_sim = True)
-        #     group_sizes, new_phenotypes = run_generation(args, population, groups, selection = False)
-        #     print(new_phenotypes)
         
         else:
             population, groups = generate_population(args, new_phenotypes, new_sim = False)
 
+        # print(f'{[(a.name, a.groups[0], a.pro_social) for a in population]}')
+
         group_sizes, new_phenotypes = run_generation(args, population , groups, selection = SELECTION)
         # print(new_phenotypes)
 
+        #-- filter out those that are inactive, meaning that they have 0 members
+        active_group_sizes = list(filter(lambda x: (x>0).any(), group_sizes)) 
+
+        #-- only store the numbers occasionally
         if num_gen % int(args.generations/3) == 0 or num_gen == args.generations - 1:
-            # all_data.append(data_generation)
             gen_numbers.append(num_gen)
-            all_generations_group_sizes.append(np.mean(group_sizes, axis=0))
-        
+            all_generations_group_sizes.append(np.mean(active_group_sizes, axis=0))
     
-    
-    
+    #-- plotting the results
     fig, axs = plt.subplots(1,2, figsize=(11, 4))
 
     #-- plot the course of the last generations' group sizes
@@ -208,7 +278,7 @@ def run_all(args):
     axs[0].set_xlabel("Rounds")
     axs[0].set_title(f"Group size last generation, agents: {args.nagents}")
     axs[0].grid()
-    axs[0].legend()
+    axs[0].legend(bbox_to_anchor=(1.01,1), loc="upper left")
    
     #-- plot the average generation groups size in a single line
     for i, line in enumerate(all_generations_group_sizes):
@@ -216,18 +286,20 @@ def run_all(args):
 
     axs[1].set_title(f"Average group size, agents: {args.nagents}")
     axs[1].set_xlabel("Rounds")
+    axs[1].set_xlim(0, args.nrounds)
     axs[1].grid()
     axs[1].legend(bbox_to_anchor=(1.01,1), loc="upper left")
     
     #-- postprocess and save plots
-    plt.subplots_adjust(left=0.05)
-    plt.savefig(f'/Users/Tom/Desktop/Thesis/Sim_V1/output/12-05-{args.nagents}-{args.ngroups}-{args.nrounds}-{args.generations}-{SELECTION}')
+    fig.suptitle(f'Groups: {args.ngroups}, Selection: {SELECTION}, Mutation prob: {MUTATION_PROB}')
+    plt.subplots_adjust(left=0.065, wspace= 0.30)
+    plt.savefig(f'/Users/Tom/Desktop/Thesis/Sim_V1/output/14-05-{args.nagents}-{args.ngroups}-{args.nrounds}-{args.generations}-{SELECTION}')
     plt.show()
     
 
 
 def main(args = None):
-    #-- 
+    #-- This part runs when the code starts, it parses the arguments given. 
 
     parser = argparse.ArgumentParser(description="process some values")
     parser.add_argument('--nagents', '-na', type = int, dest = 'nagents', help = 'The starting population size', default = 10)

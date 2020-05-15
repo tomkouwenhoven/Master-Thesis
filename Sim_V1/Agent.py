@@ -4,11 +4,11 @@ import random
 class Agent:
     #-- Agent class, with two main variables: language and history
 
-    def __init__(self, _name, _pro_social):
+    def __init__(self, _name, _pro_social, _groups):
         self.name = _name
         self.pro_social = _pro_social
         self.history = {}
-        self.groups = []
+        self.groups = [_groups]
         self.available = True
         self.social_fitness = 0
 
