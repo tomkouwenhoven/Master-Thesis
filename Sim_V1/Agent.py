@@ -10,6 +10,8 @@ class Agent:
         self.history = {}
         self.groups = [_groups]
         self.available = True
+        self.social_preference = 0 #-- 0 undecided, 1 in group, 2 out group 
+
         self.social_fitness = 0
 
     def calc_info_fitness(self):
