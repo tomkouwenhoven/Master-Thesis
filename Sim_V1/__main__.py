@@ -209,7 +209,7 @@ def run_generation(args, population, groups, selection):
     return group_sizes, new_phenotypes
 
 def run_all(args):
-    
+
     all_generations_group_sizes = []
     gen_numbers = []
 
@@ -277,8 +277,10 @@ def main(args = None):
     parser.add_argument('--generations', '-g', type = int, dest = 'generations', help ='The number of generations', default = 3)
     parser.add_argument('--nrounds', '-nr', type = int, dest = 'nrounds', help ='The number rounds for each generation', default = 5)
     args = parser.parse_args()
-        
+
     run_all(args)
+
+    
 
 if __name__ == "__main__":
     main()

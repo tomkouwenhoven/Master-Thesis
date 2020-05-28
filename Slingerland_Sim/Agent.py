@@ -9,8 +9,7 @@ class Agent:
         self.gossip_prob = _gossip_prob
         self.memory = list()
         self.available = True
-        self.groom = False
-        self.gossip = False
+        
         self.gossip_members_list = []
         self.groom_members_list = []
         self.info_fitness = 0 

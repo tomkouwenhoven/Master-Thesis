@@ -6,116 +6,37 @@
 import argparse
 
 from Agent import Agent
-from helpers import select_fittest, reproduce, split_to_groups
+from helpers import select_fittest, reproduce, split_to_groups, regroup_agents, groom, gossip
 
 import numpy as np
 import random
 
 from matplotlib import pyplot as plt
 
-SELECTION = False
+from datetime import date
+
+today = date.today()
+
+# dd/mm/YY
+date = today.strftime("%d-%m")
+
+SELECTION = True
 GROUP_REJECTION = .2
 MUTATION_PROB = .1
 
-def socialize(social_agent, out_group, population):
+def socialize(social_agent, population, out_group):
     # print()
     # print(f"{social_agent.name} wants to be outgroup social and belongs to group: {social_agent.groups[0]}")
+    
+    
+    #-- determine whether the social agents wants to groom or gossip
+    if random.uniform(0,1) < social_agent.gossip_prob:
+        #-- agent wants to be groom
+        gossip(social_agent, population, out_group)
 
-    if out_group:
-        #-- the other agents can not be in any of the groups that the social agent is part of. 
-
-        social_agent.social_preference = 2 #-- out group preference
-
-        #-- groups agent 1= [1,2]      agent 2= [3, 5, 2]      agent 3= [3,4,5]
-        other_agents = [agent for agent in population if not any(group_number in agent.groups for group_number in social_agent.groups) and agent.available]
-        # print(f'others: {[(a.name, a.groups) for a in other_agents]}')
-        
-        if other_agents:
-            #-- there must be some agents out group before you can socialize with them 
-            other = random.choice(other_agents)    
-            
-            # print(f"out group socializing agent: {social_agent.name} with agent: {other.name} from group: {other.groups[0]}")
-
-            if random.uniform(0,1) < other.pro_social or other.social_preference == 2:
-                #-- the other agent also wants to socialize out group
-
-                # print(f'Agent: {other.name} accepts')
-
-                other.social_preference = 2 
-
-                social_agent.available = False
-                other.available = False
-
-                #-- here agent.groups[0] is the first element of the groups where agent belongs to. Index 0 is the group which it is born into. 
-                social_agent.history[other.groups[0]] = social_agent.history[other.groups[0]] + 1 if other.groups[0] in social_agent.history else 1
-                other.history[social_agent.groups[0]] = other.history[social_agent.groups[0]] + 1 if social_agent.groups[0] in other.history else 1
-            
-            else:
-                #-- the other agent wants to socialize in group
-
-                # print(f'Agent: {other.name} rejects')
-
-                other.social_preference = 1
-
-
-            
-
-    else: 
-        #-- an agent plays save, and communicates with in group members. 
-
-        social_agent.social_preference = 1 #-- out group preference
-
-        other_agents = [agent for agent in population if any(group_number in social_agent.groups for group_number in agent.groups) and agent is not social_agent and agent.available]
-        # print(f'others: {[(a.name, a.groups) for a in other_agents]}')
-        if other_agents:
-            other = random.choice(other_agents)
-
-            # print(f"in group socializing agent: {social_agent.name} with agent: {other.name} from group: {other.groups[0]}")
-
-            if random.uniform(0,1) < other.pro_social or other.social_preference == 1:
-                #-- the other agent also wants to socialize in group
-                # print(f'Agent: {other.name} accepts')
-
-                social_agent.available = False
-                other.available = False
-
-                other.social_preference = 1
-                
-                #-- here agent.groups[0] is the first element of the groups where agent belongs to. Index 0 is the group which it is born into. 
-                social_agent.history[other.groups[0]] = social_agent.history[other.groups[0]] + 1 if other.groups[0] in social_agent.history else 1
-                other.history[social_agent.groups[0]] = other.history[social_agent.groups[0]] + 1 if social_agent.groups[0] in other.history else 1
-
-            else:
-                #-- the other agent wants to socialize out group
-
-                # print(f'Agent: {other.name} rejects')
-
-                other.social_preference = 2
-
-def regroup_agents(args, population, groups):
-    #-- This function checks for each infividual agent to which groups he belongs. He can be added to a group, stay in his groups or be removed from one
-
-    for agent in population:
-        added = False
-        agent.social_preference = 0
-
-        for key in agent.history:
-            group_acceptance = len(groups[key]) / 2 #-- The number of agents of a group should you have spoken before you get accepted into a group 
-            
-            if agent.history[key] >= group_acceptance and key not in agent.groups:
-                agent.groups.append(key) #-- add to agent's personal list
-                added = True
-
-        new_groups = [group for group in agent.groups[1:] if agent.history[group] >= group_acceptance]
-        if new_groups and not added: #-- can only be rejected if you are not adding new groups
-            if random.uniform(0,1) <= GROUP_REJECTION:
-                #-- an agent is deleted from a random group
-                
-                remove_group = random.choice(new_groups) 
-
-                # print(f'going to remove {agent.name} from {remove_group}')
-                agent.groups.remove(remove_group) #-- remove from agent's personal list
-                del agent.history[remove_group] #-- remove from agent's history
+    else:
+        #-- agent wants to be gossip
+        groom(social_agent, population, out_group)
 
 def run_round(args, population, groups):
     #-- runs a single round where agents can engage with each other.     
@@ -125,19 +46,17 @@ def run_round(args, population, groups):
             # print([(a.name, a.available) for a in population])
             if random.uniform(0,1) < agent.pro_social or agent.social_preference == 2:
                 #-- socialize out group
-                # print(f'Out group ---- agent: {agent.name} preference: {agent.social_preference}')
 
-                socialize(social_agent = agent, out_group = True, population = population)
+                socialize(social_agent = agent, population = population, out_group = True)
             else:
                 #-- socialize in group
-                # print(f'In group ---- agent: {agent.name} preference: {agent.social_preference}')
 
-                socialize(social_agent = agent, out_group = False, population = population)
+                socialize(social_agent = agent, population = population, out_group = False)
     
-        # print([(a.name, a.social_preference) for a in population])
-        # print("--------")
+        # print([(a.name, a.history, a.memory) for a in population])
+        print("--------")
         # print()
-    regroup_agents(args, population, groups) #-- checks for each agent their INTERNAL history and updates to which groups he belongs
+    regroup_agents(args, population, groups, GROUP_REJECTION) #-- checks for each agent their INTERNAL history and updates to which groups he belongs
     groups = split_to_groups(args, population) #-- checks the GENERAL groups in the population
     # print()
     
@@ -158,7 +77,7 @@ def generate_population(args, new_phenotypes, new_sim):
 
     if new_sim:
         for i in range(args.nagents):
-            population.append(Agent(_name = i, _pro_social = args.prosocial, _groups = (i % args.ngroups)))
+            population.append(Agent(_name = i, _pro_social = args.prosocial, _groups = (i % args.ngroups), _gossip_prob = .5))
         
         # print([a.groups for a in population])
         groups = split_to_groups(args, population)
@@ -166,7 +85,7 @@ def generate_population(args, new_phenotypes, new_sim):
     else:
         groups_phenotypes, ps_phenotypes = list(zip(*new_phenotypes))
         for i in range(args.nagents):
-            population.append(Agent(_name = i, _pro_social = ps_phenotypes[i], _groups = groups_phenotypes[i]))
+            population.append(Agent(_name = i, _pro_social = ps_phenotypes[i], _groups = groups_phenotypes[i],  _gossip_prob = .5))
 
         # print([a.groups for a in population])
         groups = split_to_groups(args, population)
@@ -176,16 +95,20 @@ def generate_population(args, new_phenotypes, new_sim):
 def run_generation(args, population, groups, selection):
     #-- run a generation of nrounds returns the new pro sociality ratings 
     group_sizes = np.zeros((args.ngroups, args.nrounds))
-    
+
     for r in range(args.nrounds):
         #-- run the social rounds
-        # print(f"round: {r}")
+        print(f"round: {r}")
         gen_groups = run_round(args, population, groups)
         
         for key in gen_groups:
             group_sizes[key][r] = len(gen_groups[key])
     
+        print(f'{[(a.name, a.history, a.memory, a.groups, a.groom_members_list, a.gossip_members_list) for a in population]}')
+
         random.shuffle(population) #-- shuffle the population so that there is no ordering effect
+        
+        
 
     #-- after all social rounds are over, it is time for selection
     if selection: 
@@ -215,7 +138,10 @@ def run_all(args):
 
     for num_gen in range(args.generations):
         #-- Run a single generation
-        print(f'\nGeneration {num_gen}')
+        print(f"Generation {num_gen}")
+
+        
+
         if num_gen == 0:
             population, groups = generate_population(args, [], new_sim = True)
         
@@ -235,7 +161,7 @@ def run_all(args):
             gen_numbers.append(num_gen)
             all_generations_group_sizes.append(np.mean(active_group_sizes, axis=0))
 
-            # print([a.pro_social for a in population])
+        
     
     #-- plotting the results
     fig, axs = plt.subplots(1,2, figsize=(11, 4))
@@ -262,7 +188,7 @@ def run_all(args):
     #-- postprocess and save plots
     fig.suptitle(f'Groups: {args.ngroups}, Selection: {SELECTION}, Mutation prob: {MUTATION_PROB}')
     plt.subplots_adjust(left=0.065, wspace= 0.30)
-    plt.savefig(f'/Users/Tom/Desktop/Thesis/Sim_V1/output/24-05-{args.nagents}-{args.ngroups}-{args.nrounds}-{args.generations}-{SELECTION}')
+    # plt.savefig(f'/Users/Tom/Desktop/Thesis/Sim_V2/output/{date}-{args.nagents}-{args.ngroups}-{args.nrounds}-{args.generations}-{SELECTION}')
     plt.show()
     
 
