@@ -20,9 +20,10 @@ today = date.today()
 # dd/mm/YY
 date = today.strftime("%d-%m")
 
-SELECTION = True
+SELECTION = False
 GROUP_REJECTION = .2
 MUTATION_PROB = .1
+GOSSIP_PROB = .2
 
 def socialize(social_agent, population, out_group):
     # print()
@@ -54,7 +55,7 @@ def run_round(args, population, groups):
                 socialize(social_agent = agent, population = population, out_group = False)
     
         # print([(a.name, a.history, a.memory) for a in population])
-        print("--------")
+        # print("--------")
         # print()
     regroup_agents(args, population, groups, GROUP_REJECTION) #-- checks for each agent their INTERNAL history and updates to which groups he belongs
     groups = split_to_groups(args, population) #-- checks the GENERAL groups in the population
@@ -77,15 +78,15 @@ def generate_population(args, new_phenotypes, new_sim):
 
     if new_sim:
         for i in range(args.nagents):
-            population.append(Agent(_name = i, _pro_social = args.prosocial, _groups = (i % args.ngroups), _gossip_prob = .5))
+            population.append(Agent(_name = i, _pro_social = args.prosocial, _groups = (i % args.ngroups), _gossip_prob = GOSSIP_PROB))
         
         # print([a.groups for a in population])
         groups = split_to_groups(args, population)
 
     else:
-        groups_phenotypes, ps_phenotypes = list(zip(*new_phenotypes))
+        groups_phenotypes, ps_phenotypes, go_phenotypes = list(zip(*new_phenotypes))
         for i in range(args.nagents):
-            population.append(Agent(_name = i, _pro_social = ps_phenotypes[i], _groups = groups_phenotypes[i],  _gossip_prob = .5))
+            population.append(Agent(_name = i, _pro_social = ps_phenotypes[i], _groups = groups_phenotypes[i],  _gossip_prob = go_phenotypes[i]))
 
         # print([a.groups for a in population])
         groups = split_to_groups(args, population)
@@ -98,13 +99,13 @@ def run_generation(args, population, groups, selection):
 
     for r in range(args.nrounds):
         #-- run the social rounds
-        print(f"round: {r}")
+        # print(f"round: {r}")
         gen_groups = run_round(args, population, groups)
         
         for key in gen_groups:
             group_sizes[key][r] = len(gen_groups[key])
     
-        print(f'{[(a.name, a.history, a.memory, a.groups, a.groom_members_list, a.gossip_members_list) for a in population]}')
+        # print(f'{[(a.name, a.gossip_prob) for a in population]}')
 
         random.shuffle(population) #-- shuffle the population so that there is no ordering effect
         
@@ -115,13 +116,15 @@ def run_generation(args, population, groups, selection):
             #-- select fittest agents from the entire population
             fitness_agent_list = [(a, a.social_fitness) for a in population]
             sorted_fitness = sorted(fitness_agent_list, key = lambda x: x[1], reverse=True) #-- list sorted from high fitness to low fitness
+            # print([(a.name, a.pro_social, a.gossip_prob) for a, _ in sorted_fitness])
             sorted_agents = [a for a, _ in sorted_fitness]
             best, rest, worst = select_fittest(sorted_agents, 0.1) #-- select the best and worst 5 % of the agents. 
 
             # print(f'agent fitness, pro-social: {[(a.groups[0], a.social_fitness, a.pro_social) for a in sorted_agents]}\n')
 
             new_phenotypes = reproduce(agent_list = best + best + rest, mut_prob = MUTATION_PROB)
-
+            # print("-----")
+            # print(new_phenotypes)
     else:
         #-- all agents can reproduce
         # print(f'agent fitness, pro-social: {[(a.groups[0], a.social_fitness, a.pro_social) for a in population]}\n')
@@ -129,12 +132,15 @@ def run_generation(args, population, groups, selection):
     
     # print(f'Ending group sizes: {[len(groups[key]) for key in groups]}')
     # print(f'Phenotypes: {new_phenotypes}')
+
     return group_sizes, new_phenotypes
 
 def run_all(args):
     
     all_generations_group_sizes = []
     gen_numbers = []
+    gossip_probabilities = []
+
 
     for num_gen in range(args.generations):
         #-- Run a single generation
@@ -151,7 +157,9 @@ def run_all(args):
         # print(f'{[(a.name, a.groups[0], a.pro_social) for a in population]}')
 
         group_sizes, new_phenotypes = run_generation(args, population , groups, selection = SELECTION)
-        # print(new_phenotypes)
+        
+        _, _, gossip_prob = list(zip(*new_phenotypes))
+        gossip_probabilities.append(gossip_prob)
 
         #-- filter out those that are inactive, meaning that they have 0 members
         active_group_sizes = list(filter(lambda x: (x>0).any(), group_sizes)) 
@@ -161,17 +169,23 @@ def run_all(args):
             gen_numbers.append(num_gen)
             all_generations_group_sizes.append(np.mean(active_group_sizes, axis=0))
 
-        
-    
+        # print(f'{[(a.name, a.gossip_prob) for a in population]}')
+
+    # print(gossip_probabilities)    
+    avg_gossip_probs = np.mean(gossip_probabilities, axis = 1)
+
+    # plt.plot(avg_gossip_probs)
+    # plt.show()
+
     #-- plotting the results
-    fig, axs = plt.subplots(1,2, figsize=(11, 4))
+    fig, axs = plt.subplots(1,3, figsize=(15, 4))
 
     #-- plot the course of the last generations' group sizes
     for i, line in enumerate(group_sizes):
         axs[0].plot(line, label=i)
     axs[0].set_ylabel("Group size")
     axs[0].set_xlabel("Rounds")
-    axs[0].set_title(f"Group size last generation, agents: {args.nagents}")
+    axs[0].set_title(f"Group size last generation")
     axs[0].grid()
     axs[0].legend(bbox_to_anchor=(1.01,1), loc="upper left")
    
@@ -185,10 +199,16 @@ def run_all(args):
     axs[1].grid()
     axs[1].legend(bbox_to_anchor=(1.01,1), loc="upper left")
     
+    axs[1].set_title(f"Average gossip probability")
+    axs[2].plot(avg_gossip_probs)
+    axs[2].set_xlabel("Generation")
+    axs[2].set_xlim(0, args.generations)
+    axs[2].set_ylabel("Gossip Probability")
+
     #-- postprocess and save plots
-    fig.suptitle(f'Groups: {args.ngroups}, Selection: {SELECTION}, Mutation prob: {MUTATION_PROB}')
-    plt.subplots_adjust(left=0.065, wspace= 0.30)
-    # plt.savefig(f'/Users/Tom/Desktop/Thesis/Sim_V2/output/{date}-{args.nagents}-{args.ngroups}-{args.nrounds}-{args.generations}-{SELECTION}')
+    fig.suptitle(f'Agents: {args.nagents}, Groups: {args.ngroups}, Selection: {SELECTION}, Mutation prob: {MUTATION_PROB}')
+    plt.subplots_adjust(left=0.05, right=0.95, wspace=0.50)
+    plt.savefig(f'/Users/Tom/Desktop/Thesis/Sim_V2/output/{date}-{args.nagents}-{args.ngroups}-{args.nrounds}-{args.generations}-{SELECTION}')
     plt.show()
     
 

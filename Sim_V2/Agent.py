@@ -16,8 +16,7 @@ class Agent:
 
         self.gossip_prob = _gossip_prob
         self.memory = list()
-        self.groom = False
-        self.gossip = False
+
         self.gossip_members_list = []
         self.groom_members_list = []
         
@@ -26,14 +25,13 @@ class Agent:
         self.fitness = 0
 
     def calc_info_fitness(self):
-        pass
+         self.info_fitness = len(self.memory) ** 2
 
     def calc_social_fitness(self):
         self.social_fitness = len(self.groups)
-        
 
     def func(self, n_people):
-        pass
+        return 1 / (n_people - 1)
 
     def calc_fitness(self):
         pass
