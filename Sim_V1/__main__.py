@@ -13,7 +13,7 @@ import random
 
 from matplotlib import pyplot as plt
 
-SELECTION = False
+SELECTION = True
 GROUP_REJECTION = .2
 MUTATION_PROB = .1
 
@@ -262,7 +262,7 @@ def run_all(args):
     #-- postprocess and save plots
     fig.suptitle(f'Groups: {args.ngroups}, Selection: {SELECTION}, Mutation prob: {MUTATION_PROB}')
     plt.subplots_adjust(left=0.065, wspace= 0.30)
-    plt.savefig(f'/Users/Tom/Desktop/Thesis/Sim_V1/output/24-05-{args.nagents}-{args.ngroups}-{args.nrounds}-{args.generations}-{SELECTION}')
+    plt.savefig(f'/Users/Tom/Desktop/Thesis/Sim_V1/output/29-05-{args.nagents}-{args.ngroups}-{args.nrounds}-{args.generations}-{SELECTION}')
     plt.show()
     
 

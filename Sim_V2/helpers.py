@@ -82,7 +82,6 @@ def groom(social_agent, population, out_group):
 
         if other:
             #-- there must be some agent out group before you can socialize with them 
-            
             # print(f"out group socializing agent: {social_agent.name} with agent: {other.name} from group: {other.groups[0]}")
 
             preference = other.social_preference if other.social_preference !=0 else determine_preference(other)
@@ -123,9 +122,8 @@ def groom(social_agent, population, out_group):
         other = get_groom_participant(social_agent, population, False) #-- pick other agent
        
         if other:
-
+            #-- there must be some agent out group before you can socialize with them
             # print(f"in group grooming socializing agent: {social_agent.name} with agent: {other.name} from group: {other.groups[0]}")
-
             preference = other.social_preference if other.social_preference !=0 else determine_preference(other)
             # print(f'preference other: {preference}')
 
@@ -168,13 +166,11 @@ def gossip(social_agent, population, out_group):
 
     if out_group:
         #-- the other agents are only from other groups. 
-
         social_agent.social_preference = 2 #-- out group preference
        
         possible_participants = get_gossip_participants(social_agent, population, True)
         if possible_participants:
             for other_agent in possible_participants:
-                
                 preference = other_agent.social_preference if other_agent.social_preference !=0 else determine_preference(other_agent)
                 # print(f'preference other: {preference}')
                 

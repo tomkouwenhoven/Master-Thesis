@@ -2,7 +2,7 @@ import numpy as np
 import random
 
 class Agent:
-    #-- Agent class, with two main variables: language and history
+    #-- Agent class, with two main variables: gossip probability and prosocial 
 
     def __init__(self, _name, _pro_social, _groups, _gossip_prob):
         self.name = _name
@@ -19,7 +19,6 @@ class Agent:
 
         self.gossip_members_list = []
         self.groom_members_list = []
-        
         
         self.info_fitness = 0 
         self.fitness = 0
