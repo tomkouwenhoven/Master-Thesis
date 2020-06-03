@@ -108,11 +108,15 @@ def groom(social_agent, population, out_group):
                 event_no += 1
 
             else:
-                #-- the other agent wants to socialize in group
+                #-- the other agent wants to socialize in group so he rejects
 
                 # print(f'Agent: {other.name} rejects')
 
                 other.social_preference = 1
+                other.available = False
+
+                social_agent.available = False
+
 
     else: 
         #-- an agent plays save, and communicates with in group members. 
@@ -152,6 +156,9 @@ def groom(social_agent, population, out_group):
                 # print(f'Agent: {other.name} rejects')
 
                 other.social_preference = 2
+                other.available = False
+
+                social_agent.available = False
     
 def gossip(social_agent, population, out_group):
     #-- Gossiping is one-to-MANY with a maximum of 3 others. It is only possible if all agents are not active in another grooming or gossiping event.
@@ -175,36 +182,19 @@ def gossip(social_agent, population, out_group):
                 # print(f'preference other: {preference}')
                 
                 if preference == 2:
-                    
-                    other_agent.social_preference = 2
+                    # print(f'agent: {other_agent.name} accepts')
+                    other_agent.social_preference = preference
 
                     actual_participants.append(other_agent)
                 
                 else:
+                    #-- other agent does not want to gossip out group and rejects. 
                     #-- preference of an agent should be stored for next possible events. 
+
                     # print(f'agent: {other_agent.name} rejects')
-                    other_agent.social_preference = 1
+                    other_agent.social_preference = preference
+                    other_agent.available = False
 
-            if actual_participants:
-                gossiping_agents = [social_agent] + actual_participants
-                
-                # #-- Pick gossiping agent and share memory
-                # info_agent = random.choice(gossiping_agents)
-                # shared_events = random.sample(info_agent.memory, 10 if 10 < len(info_agent.memory) else len(info_agent.memory))
-                # add_by_gossip(gossiping_agents, shared_events)
-
-                # print(f'Willing to gossip: {[a.name for a in gossiping_agents]}')  
-                
-                #-- Add the gossiping event itself to everyones memory and history 
-                add_event_to_mem(gossiping_agents, [f'event_{event_no}'])
-                add_interaction_to_hist(gossiping_agents)
-
-                #-- Make sure that none of the agents can engage in other social activities. 
-                for agent in gossiping_agents:
-                    agent.available = False
-                    agent.gossip_members_list.append(len(gossiping_agents))
-
-                event_no += 1
     else:
         #-- the other agents are only from known groups. 
 
@@ -219,36 +209,36 @@ def gossip(social_agent, population, out_group):
                 # print(f'preference other: {preference}')
                 
                 if preference == 1:
-                    
-                    other_agent.social_preference = 1
+                    # print(f'agent: {other_agent.name} accepts')
+                    other_agent.social_preference = preference
 
                     actual_participants.append(other_agent)
                 
                 else:
+                    #-- other agent does want to gossip out group and rejects. 
                     #-- preference of an agent should be stored for next possible events. 
                     # print(f'agent: {other_agent.name} rejects')
-                    other_agent.social_preference = 2
+                    other_agent.social_preference = preference
+                    other_agent.available = False
 
-            if actual_participants:
-                gossiping_agents = [social_agent] + actual_participants
+    if actual_participants:
+        gossiping_agents = [social_agent] + actual_participants
 
-                # #-- Pick gossiping agent and share memory
-                # info_agent = random.choice(gossiping_agents)
-                # shared_events = random.sample(info_agent.memory, 10 if 10 < len(info_agent.memory) else len(info_agent.memory))
-                # add_by_gossip(gossiping_agents, shared_events)
+        # #-- Pick gossiping agent and share memory
+        info_agent = random.choice(gossiping_agents)
+        shared_events = random.sample(info_agent.memory, 10 if 10 < len(info_agent.memory) else len(info_agent.memory))
+        add_by_gossip(gossiping_agents, shared_events)
+        
+        #-- Add the gossiping event itself to everyones memory and history 
+        add_event_to_mem(gossiping_agents, [f'event_{event_no}'])
+        add_interaction_to_hist(gossiping_agents)
 
-                # print(f'Willing to gossip: {[a.name for a in gossiping_agents]}')  
-                
-                #-- Add the gossiping event itself to everyones memory and history 
-                add_event_to_mem(gossiping_agents, [f'event_{event_no}'])
-                add_interaction_to_hist(gossiping_agents)
+        #-- Make sure that none of the agents can engage in other social activities. 
+        for agent in gossiping_agents:
+            agent.available = False
+            agent.gossip_members_list.append(len(gossiping_agents))
 
-                #-- Make sure that none of the agents can engage in other social activities. 
-                for agent in gossiping_agents:
-                    agent.available = False
-                    agent.gossip_members_list.append(len(gossiping_agents))
-
-                event_no += 1
+        event_no += 1
 
 
 def add_interaction_to_hist(agents):
@@ -284,8 +274,6 @@ def get_gossip_participants(social_agent, population, out_group):
     else: 
         #-- from within know groups
         available_agents = [agent for agent in population if any(group_number in agent.groups for group_number in social_agent.groups) and agent is not social_agent and agent.available]
-
-    # print(f'available agents: {[(a.name, a.groups[0]) for a in available_agents]}')
 
     #-- determine with how many and with who the social agent will gossip. 
     num_participants = random.randint(1,3)
