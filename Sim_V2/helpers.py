@@ -30,12 +30,14 @@ def reproduce(agent_list, mut_prob):
 
 def split_to_groups(args, population):
     groups = {}
+    for i in range(args.ngroups):
+        groups[i] = []
+
     for agent in population:
         for group in agent.groups:
-            if group in groups.keys():
-                groups[group].append(agent)
-            else:
-                    groups[group] = [agent]    
+            
+            groups[group].append(agent)
+
 
     return groups    
 
@@ -301,4 +303,22 @@ def get_groom_participant(social_agent, population, out_group):
     else:
         return None
      
-        
+def get_group_values(groups):
+    # print(groups)
+    avg_gp_per_group = {}
+    avg_ps_per_group = {}
+    for key in groups:
+        if len(groups[key]) > 0:
+
+        # print(key, groups[key])
+            avg_gp, avg_ps = np.mean([(a.gossip_prob, a.pro_social) for a in groups[key]], axis = 0)
+            avg_gp_per_group[key] = avg_gp
+            avg_ps_per_group[key] = avg_ps
+        else:
+            avg_gp_per_group[key] = None
+            avg_ps_per_group[key] = None
+
+    sort_by_group_gp = sorted(avg_gp_per_group.items())
+    sort_by_group_ps = sorted(avg_ps_per_group.items())
+
+    return list(zip(*sort_by_group_gp))[1], list(zip(*sort_by_group_ps))[1]
