@@ -20,8 +20,8 @@ today = date.today()
 # dd/mm/YY
 date = today.strftime("%d-%m")
 
-SELECTION = True
-GROUP_REJECTION = .2
+SELECTION = False
+GROUP_REJECTION = .5
 MUTATION_PROB = .05
 
 def socialize(social_agent, population, out_group):
@@ -209,7 +209,7 @@ def run_all(args):
     #-- postprocess and save plots
     fig.suptitle(f'Agents: {args.nagents}, Groups: {args.ngroups}, Selection: {SELECTION}, Mutation prob: {MUTATION_PROB}')
     plt.subplots_adjust(bottom=0.075, left=0.075, right=0.9, wspace=0.50, hspace=0.30, top=0.9)
-    # plt.savefig(f'/Users/Tom/Desktop/Thesis/Sim_V2/output/{date}-{args.nagents}-{args.ngroups}-{args.nrounds}-{args.generations}-{str(args.prosocial).replace(".", "")}-{str(args.gossipprob).replace(".", "")}-{SELECTION}')
+    plt.savefig(f'/Users/Tom/Desktop/Thesis/Sim_V2/output/{date}-{args.nagents}-{args.ngroups}-{args.nrounds}-{args.generations}-{str(args.prosocial).replace(".", "")}-{str(args.gossipprob).replace(".", "")}-{SELECTION}')
     plt.show()
 
 def main(args = None):
