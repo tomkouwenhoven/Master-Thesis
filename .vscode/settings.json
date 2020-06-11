@@ -1,3 +1,4 @@
 {
-    "python.pythonPath": "env/bin/python3.7"
+    "python.pythonPath": "/Users/Tom/Desktop/Thesis_Code/env/bin/python3.7",
+    "git.ignoreLimitWarning": true
 }

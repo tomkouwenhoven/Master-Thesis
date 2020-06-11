@@ -1,8 +1,5 @@
 # this is the main python code which you should run from terminal
 
-##TODO
-# - Maximaal aantal groepen voor 1 agent 
-
 import argparse
 
 from Agent import Agent
@@ -108,7 +105,6 @@ def run_generation(args, population, groups, selection):
     return group_sizes, new_phenotypes
 
 def run_all(args):
-    
     all_generations_group_sizes = []
     gen_numbers = []
     gossip_probabilities = []
@@ -119,7 +115,7 @@ def run_all(args):
 
     for num_gen in range(args.generations):
         #-- Run a single generation
-        print(f"Generation {num_gen}")
+        print(f'Generation {num_gen}')
 
         if num_gen == 0:
             population, groups = generate_population(args, [], new_sim = True)
@@ -145,7 +141,7 @@ def run_all(args):
         active_group_sizes = list(filter(lambda x: (x>0).any(), group_sizes)) 
 
         #-- only store the numbers occasionally
-        if num_gen % int(args.generations/5) == 0 or num_gen == args.generations - 1:
+        if num_gen % int(args.generations/1) == 0 or num_gen == args.generations - 1:
             gen_numbers.append(num_gen)
             all_generations_group_sizes.append(np.mean(active_group_sizes, axis=0))
 
@@ -155,6 +151,8 @@ def run_all(args):
    
     avg_gossip_probs = np.mean(gossip_probabilities, axis = 1)
     avg_pro_social_probs = np.mean(pro_social_probabilities, axis = 1)
+
+    # return np.array(all_generations_group_sizes)#, np.array(gen_numbers), np.array(avg_gossip_probs), np.array(avg_pro_social_probs), np.array(group_sizes), np.array(group_by_generation_gp), np.array(group_by_generation_gs)
 
     #-- plotting the results
     fig, axs = plt.subplots(2,3, figsize=(15, 7.5))
@@ -209,8 +207,9 @@ def run_all(args):
     #-- postprocess and save plots
     fig.suptitle(f'Agents: {args.nagents}, Groups: {args.ngroups}, Selection: {SELECTION}, Mutation prob: {MUTATION_PROB}')
     plt.subplots_adjust(bottom=0.075, left=0.075, right=0.9, wspace=0.50, hspace=0.30, top=0.9)
-    plt.savefig(f'/Users/Tom/Desktop/Thesis/Sim_V2/output/{date}-{args.nagents}-{args.ngroups}-{args.nrounds}-{args.generations}-{str(args.prosocial).replace(".", "")}-{str(args.gossipprob).replace(".", "")}-{SELECTION}')
+    # plt.savefig(f'/Users/Tom/Desktop/Thesis_Code/Sim_V2/output/{date}-{args.nagents}-{args.ngroups}-{args.nrounds}-{args.generations}-{str(args.prosocial).replace(".", "")}-{str(args.gossipprob).replace(".", "")}-{SELECTION}')
     plt.show()
+    
 
 def main(args = None):
     #-- This part runs when the code starts, it parses the arguments given. 
@@ -224,8 +223,9 @@ def main(args = None):
     parser.add_argument('--nrounds', '-nr', type = int, dest = 'nrounds', help ='The number rounds for each generation', default = 5)
     args = parser.parse_args()
         
+    #-- run the simulation      
     run_all(args)
-
+    
 if __name__ == "__main__":
     main()
 
