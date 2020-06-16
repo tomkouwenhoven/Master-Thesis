@@ -1,5 +1,41 @@
 
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 
+from os import listdir
+from os.path import isfile, join
+from os import getcwd
+
+sns.set(style="darkgrid")
+
+path = getcwd()
+print(path)
+
+files = [f for f in listdir(f'{path}/output/data') if isfile(join(f'{path}/output/data', f))]
+
+files.remove('.DS_Store') #-- stupid Mac file
+
+def calc_mean(files):
+    all_arrays = []
+    for file in files:
+        # print(file)
+        # print(np.load(f'{path}/output/data/{file}'))
+        all_arrays.append(np.load(f'{path}/output/data/{file}'))
+    
+    arrays = np.array(all_arrays)
+
+    return np.mean(arrays, axis=0)
+
+average_group_sizes_over_all = calc_mean(files)
+print(average_group_sizes_over_all.shape)
+
+df = pd.DataFrame(data=average_group_sizes_over_all, index=list(range(0, 2)), columns=list(range(0,5)))
+print(df)
+# df = pd.DataFrame(data=numpy_data, index=["row1", "row2"], columns=["column1", "column2"])
+
+# sns.relplot(x="timepoint", y="signal", kind="line", data=fmri);
 
 
     # #-- plotting the results
