@@ -14,19 +14,19 @@ def select_fittest(fitness_list, perc):
     return fitness_list[:p], fitness_list[p:l-p], fitness_list[l-p:]
 
 def reproduce(agent_list, mut_prob):
-    new_pro_social_list = []
+    new_tolerance_list = []
     for agent in agent_list:
         if random.uniform(0,1) <= mut_prob:
             mutation_rate_social = random.choice([0.05, -0.05])
             mutation_rate_go_prob = random.choice([0.05, -0.05])
 
-            new_pro_social_probability = np.clip(agent.pro_social + mutation_rate_social, 0.01, 0.99) #-- make sure that the pro sociality is not below 0.01 and above 0.99
+            new_tolerance_probability = np.clip(agent.tolerance + mutation_rate_social, 0.01, 0.99) #-- make sure that the tolerance is not below 0.01 and above 0.99
             new_gossip_probability = np.clip(agent.gossip_prob + mutation_rate_go_prob, 0.01, 0.99) #-- make sure that the probability is not below 0.01 and above 0.99
         # new_go_probability = agent.gossip_prob * (1 + (mutation_rate_social * direction))
-            new_pro_social_list.append((agent.groups[0], new_pro_social_probability, new_gossip_probability))
+            new_tolerance_list.append((agent.groups[0], new_tolerance_probability, new_gossip_probability))
         else:
-                new_pro_social_list.append((agent.groups[0], agent.pro_social, agent.gossip_prob))
-    return new_pro_social_list
+                new_tolerance_list.append((agent.groups[0], agent.tolerance, agent.gossip_prob))
+    return new_tolerance_list
 
 def split_to_groups(args, population):
     groups = {}
@@ -107,6 +107,16 @@ def groom(social_agent, population, out_group):
                 social_agent.groom_members_list.append(2)
                 other.groom_members_list.append(2)
 
+                #-- 4 observers can observe the event, however, if you are in the event you can not observe the event itself. 
+                available_observers = [a for a in population if a is not social_agent and a is not other]
+                observers = random.sample(available_observers, 4 if 4 < len(available_observers) else len(available_observers))
+
+                # print(f"Grooming {event_no} out group done by: {social_agent.name, other.name} is observed by: {[a.name for a in observers]}")
+
+                #-- add event to the memories of the observers
+                for observer in observers:
+                    observe(observer, event_no)
+
                 event_no += 1
 
             else:
@@ -149,6 +159,16 @@ def groom(social_agent, population, out_group):
 
                 social_agent.groom_members_list.append(2)
                 other.groom_members_list.append(2)
+
+                #-- 4 observers can observe the event, however, if you are in the event you can not observe the event itself. 
+                available_observers = [a for a in population if a is not social_agent and a is not other]
+                observers = random.sample(available_observers, 4 if 4 < len(available_observers) else len(available_observers))
+
+                # print(f"Grooming {event_no} in group done by: {social_agent.name, other.name} is observed by: {[a.name for a in observers]}")
+
+                #-- add event to the memories of the observers
+                for observer in observers:
+                    observe(observer, event_no)
 
                 event_no += 1
 
@@ -240,6 +260,16 @@ def gossip(social_agent, population, out_group):
             agent.available = False
             agent.gossip_members_list.append(len(gossiping_agents))
 
+        #-- 4 observers can observe the event, however, if you are in the event you can not observe the event itself. 
+        available_observers = [a for a in population if a not in gossiping_agents]
+        observers = random.sample(available_observers, 4 if 4 < len(available_observers) else len(available_observers))
+
+        # print(f"gossip {event_no} done by: {[a.name for a in gossiping_agents]} is observed by: {[a.name for a in observers]}")
+
+        #-- add event to the memories of the observers
+        for observer in observers:
+            observe(observer, event_no)
+
         event_no += 1
 
 
@@ -264,9 +294,12 @@ def add_by_gossip(agents, events):
         a.memory += new_memories
         # a.event_members_list.append(len(agents))
 
+def observe(observer, event_name):
+    observer.memory.append(f'event_{event_name}')
+
 def determine_preference(agent):
     #-- 0 undecided, 1 in group, 2 out group
-    return 2 if random.uniform(0,1) < agent.pro_social else 1
+    return 2 if random.uniform(0,1) < agent.tolerance else 1
 
 def get_gossip_participants(social_agent, population, out_group):
 
@@ -306,19 +339,19 @@ def get_groom_participant(social_agent, population, out_group):
 def get_group_values(groups):
     # print(groups)
     avg_gp_per_group = {}
-    avg_ps_per_group = {}
+    avg_tol_per_group = {}
     for key in groups:
         if len(groups[key]) > 0:
 
         # print(key, groups[key])
-            avg_gp, avg_ps = np.mean([(a.gossip_prob, a.pro_social) for a in groups[key]], axis = 0)
+            avg_gp, avg_tol = np.mean([(a.gossip_prob, a.tolerance) for a in groups[key]], axis = 0)
             avg_gp_per_group[key] = avg_gp
-            avg_ps_per_group[key] = avg_ps
+            avg_tol_per_group[key] = avg_tol
         else:
             avg_gp_per_group[key] = None
-            avg_ps_per_group[key] = None
+            avg_tol_per_group[key] = None
 
     sort_by_group_gp = sorted(avg_gp_per_group.items())
-    sort_by_group_ps = sorted(avg_ps_per_group.items())
+    sort_by_group_tol = sorted(avg_tol_per_group.items())
 
-    return list(zip(*sort_by_group_gp))[1], list(zip(*sort_by_group_ps))[1]
+    return list(zip(*sort_by_group_gp))[1], list(zip(*sort_by_group_tol))[1]
