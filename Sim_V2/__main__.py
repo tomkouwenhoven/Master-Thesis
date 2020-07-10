@@ -13,6 +13,7 @@ from matplotlib import pyplot as plt
 from datetime import datetime
 
 from os import getcwd
+import os
 
 path = getcwd()
 today = datetime.now()
@@ -121,7 +122,7 @@ def run_all(args):
 
     for num_gen in range(args.generations):
         #-- Run a single generation
-        print(f'Generation {num_gen}')
+        # print(f'Generation {num_gen}')
 
         if num_gen == 0:
             population, groups = generate_population(args, [], new_sim = True)
@@ -158,7 +159,7 @@ def run_all(args):
     avg_gossip_probs = np.mean(gossip_probabilities, axis = 1)
     avg_tolerance_probs = np.mean(tolerance_probabilities, axis = 1)
 
-    # return np.array(all_generations_group_sizes), np.array(gen_numbers) #, np.array(avg_gossip_probs), np.array(avg_tolerance_probs), np.array(group_sizes), np.array(group_by_generation_gp), np.array(group_by_generation_tol)
+    return np.array(all_generations_group_sizes), np.array(gen_numbers), np.array(group_sizes) #, np.array(avg_gossip_probs), np.array(avg_tolerance_probs), np.array(group_sizes), np.array(group_by_generation_gp), np.array(group_by_generation_tol)
 
     #-- plotting the results
 
@@ -231,22 +232,32 @@ def run_all(args):
 
 def main(args = None):
     #-- This part runs when the code starts, it parses the arguments given. 
+    print("Running simulation..")
 
     parser = argparse.ArgumentParser(description="process some values")
     parser.add_argument('--nagents', '-na', type = int, dest = 'nagents', help = 'The starting population size', default = 10)
-    parser.add_argument('--tolerance', '-tol', type = float, dest = 'tolerance', help = 'The starting tolerance chance for each agent', default = 0.2)
-    parser.add_argument('--gossipprob', '-gp', type = float, dest = 'gossipprob', help = 'The starting gossip probability for each agent', default = 0.2)
+    parser.add_argument('--tolerance', '-tol', type = float, dest = 'tolerance', help = 'The starting tolerance chance for each agent', default = 0.5)
+    parser.add_argument('--gossipprob', '-gp', type = float, dest = 'gossipprob', help = 'The starting gossip probability for each agent', default = 0.5)
     parser.add_argument('--ngroups', '-ng', type = int, dest = 'ngroups', help = 'The starting number of groups', default = 5)
     parser.add_argument('--generations', '-g', type = int, dest = 'generations', help ='The number of generations', default = 3)
     parser.add_argument('--nrounds', '-nr', type = int, dest = 'nrounds', help ='The number rounds for each generation', default = 5)
     args = parser.parse_args()
         
     #-- run the simulation      
-    # all_generations_group_sizes, generation_labels = run_all(args)
-    run_all(args)
+    #-- all_generation_group_sizes is an array that contains the average group size of the entire population per generation. Each row represents a generation and each column is a round. 
+    all_generations_group_sizes, generation_labels, group_sizes = run_all(args)
 
-    # np.save(f'{path}/output/data/{date}-{args.nagents}-{args.ngroups}-{args.nrounds}-{args.generations}-{str(args.tolerance).replace(".", "")}-{str(args.gossipprob).replace(".", "")}-{SELECTION}.npy', all_generations_group_sizes)
-    
+    zipped_list = np.array(list(zip(generation_labels,all_generations_group_sizes)))
+    # run_all(args)
+
+    newpath = path + '/output/data/' + f'{args.nagents}-{args.ngroups}-{args.nrounds}-{args.generations}-{str(args.tolerance).replace(".", "")}-{str(args.gossipprob).replace(".", "")}-{SELECTION}'
+    if not os.path.exists(newpath):
+        os.makedirs(newpath)
+
+    np.save(f'{newpath}/{date}-avg-groupsize-over-pop.npy', zipped_list) #--saves the average group size of the ENTIRE population for each round in a generation
+    np.save(f'{newpath}/{date}-last_generation_groups.npy', group_sizes) #--saves the group sizes of the last generation. 
+
+
 if __name__ == "__main__":
     main()
 
