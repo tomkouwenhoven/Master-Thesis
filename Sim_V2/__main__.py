@@ -148,9 +148,9 @@ def run_all(args):
         active_group_sizes = list(filter(lambda x: (x>0).any(), group_sizes)) 
 
         #-- only store the numbers occasionally
-        if num_gen % int(args.generations/5) == 0 or num_gen == args.generations - 1:
-            gen_numbers.append(num_gen)
-            all_generations_group_sizes.append(np.mean(active_group_sizes, axis=0))
+        # if num_gen % int(args.generations/5) == 0 or num_gen == args.generations - 1:
+        gen_numbers.append(num_gen)
+        all_generations_group_sizes.append(np.mean(active_group_sizes, axis=0))
 
     #-- reshape the vectors to a 2d matrix of colomns = generations and rows = groups
     group_by_generation_gp = list(map(list, zip(*per_generation_group_gp)))
@@ -159,10 +159,10 @@ def run_all(args):
     avg_gossip_probs = np.mean(gossip_probabilities, axis = 1)
     avg_tolerance_probs = np.mean(tolerance_probabilities, axis = 1)
 
-    return np.array(all_generations_group_sizes), np.array(gen_numbers), np.array(group_sizes) #, np.array(avg_gossip_probs), np.array(avg_tolerance_probs), np.array(group_sizes), np.array(group_by_generation_gp), np.array(group_by_generation_tol)
+    return np.array(all_generations_group_sizes), np.array(gen_numbers), np.array(group_sizes), np.array(avg_gossip_probs), np.array(avg_tolerance_probs), np.array(group_by_generation_gp), np.array(group_by_generation_tol)
 
     #-- plotting the results
-
+'''
     c = plt.get_cmap('tab20') #-- get colormap 
 
     fig, axs = plt.subplots(3,2, figsize=(15, 10))
@@ -228,7 +228,7 @@ def run_all(args):
     plt.subplots_adjust(bottom=0.075, left=0.05, right=0.85, wspace=0.50, hspace=0.40, top=0.9)
     plt.savefig(f'{path}/output/plots/{date}-{args.nagents}-{args.ngroups}-{args.nrounds}-{args.generations}-{str(args.tolerance).replace(".", "")}-{str(args.gossipprob).replace(".", "")}-{SELECTION}')
     plt.show()
-    
+'''    
 
 def main(args = None):
     #-- This part runs when the code starts, it parses the arguments given. 
@@ -245,9 +245,11 @@ def main(args = None):
         
     #-- run the simulation      
     #-- all_generation_group_sizes is an array that contains the average group size of the entire population per generation. Each row represents a generation and each column is a round. 
-    all_generations_group_sizes, generation_labels, group_sizes = run_all(args)
+    all_generations_group_sizes, generation_labels, group_sizes, average_gossip_probabilities, average_tolerance_probabilities, group_gossip_prob, group_tolerance_prob = run_all(args)
 
-    zipped_list = np.array(list(zip(generation_labels,all_generations_group_sizes)))
+    zipped_list = np.array(list(zip(generation_labels, all_generations_group_sizes)))
+    zipped_phenotypes = np.array(list(zip(average_gossip_probabilities, average_tolerance_probabilities)))
+    zipped_group_probabilities = np.array(list(zip(group_gossip_prob, group_tolerance_prob)))
     # run_all(args)
 
     newpath = path + '/output/data/' + f'{args.nagents}-{args.ngroups}-{args.nrounds}-{args.generations}-{str(args.tolerance).replace(".", "")}-{str(args.gossipprob).replace(".", "")}-{SELECTION}'
@@ -256,7 +258,8 @@ def main(args = None):
 
     np.save(f'{newpath}/{date}-avg-groupsize-over-pop.npy', zipped_list) #--saves the average group size of the ENTIRE population for each round in a generation
     np.save(f'{newpath}/{date}-last_generation_groups.npy', group_sizes) #--saves the group sizes of the last generation. 
-
+    np.save(f'{newpath}/{date}-avg_phenotypes_over_pop.npy', zipped_phenotypes) #--saves the average phenotypes over the population . 
+    np.save(f'{newpath}/{date}-avg_phenotypes_per_group.npy', zipped_group_probabilities) #--saves the average phenotypes per group . 
 
 if __name__ == "__main__":
     main()
