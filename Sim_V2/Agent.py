@@ -4,9 +4,9 @@ import random
 class Agent:
     #-- Agent class, with two main variables: gossip probability and prosocial 
 
-    def __init__(self, _name, _pro_social, _groups, _gossip_prob):
+    def __init__(self, _name, _tolerance, _groups, _gossip_prob):
         self.name = _name
-        self.pro_social = _pro_social
+        self.tolerance = _tolerance
         self.history = {}
         self.groups = [_groups]
         self.available = True
