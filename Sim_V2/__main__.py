@@ -21,7 +21,7 @@ today = datetime.now()
 # dd/mm/YY
 date = today.strftime("%Y-%m-%dT%H:%M:%S") #-- %d-%m-%h-%m-%s
 
-SELECTION = True
+SELECTION = False
 GROUP_REJECTION = .4
 MUTATION_PROB = .05
 
