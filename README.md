@@ -9,7 +9,7 @@ To activate the virtual environment by running ```source env/bin/activate``` at 
 
 To run the Slingerland code run ```python Slingerland_Sim.py 200``` and a simulation with 200 generations will start. 
 
-To run the Sim_V1 code run ```python __main__.py``` 
+To run the Sim_V1 or Sim_V2 code run ```python __main__.py``` in your terminal.
 Provide arbitrary starting parameters in the following way:
 
 - ```--nagents 50```
@@ -19,3 +19,5 @@ Provide arbitrary starting parameters in the following way:
 - ```--ngenerations 1```
 
 Or run ```python __main__.py --help``` to see the options available.
+
+The difference between V1 and V2 is that observations are not implemented in V1. Hence it's mechanism is not yet equal to that of Slingerland. 
