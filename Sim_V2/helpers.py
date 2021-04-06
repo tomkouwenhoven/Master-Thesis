@@ -72,115 +72,90 @@ def groom(social_agent, population, out_group):
     #-- It first determines if there are agents to groom, out or in group. Then adds the event to the memories, lastly it updates the encounters with groups. 
     
     global event_no
-    
+
+    actual_participants = []
+
     # print(f'Grooming event: {event_no} out group: {out_group}')
+
     # print(f'social agent {social_agent.name} from group: {social_agent.groups[0]}')
+
     if out_group:
+        # print('outgroup grooming')
         #-- the other agents are only from other groups. 
-
         social_agent.social_preference = 2 #-- out group preference
-        
-        other = get_groom_participant(social_agent, population, True) #-- pick other agent
-
-        if other:
-            #-- there must be some agent out group before you can socialize with them 
-            # print(f"out group socializing agent: {social_agent.name} with agent: {other.name} from group: {other.groups[0]}")
-
-            preference = other.social_preference if other.social_preference !=0 else determine_preference(other)
-            # print(f'preference other: {preference}')
-
-            if preference == 2:
-                #-- the other agent also wants to socialize out group
-
-                # print(f'Agent: {other.name} accepts')
-
-                other.social_preference = 2 
-
-                #-- THE EVENT
-                social_agent.available = False
-                other.available = False
-
-                #-- Add the gossiping event itself to everyones memory and history 
-                add_event_to_mem([social_agent, other], [f'event_{event_no}'])
-                add_interaction_to_hist([social_agent, other])          
-                
-                social_agent.groom_members_list.append(2)
-                other.groom_members_list.append(2)
-
-                #-- 4 observers can observe the event, however, if you are in the event you can not observe the event itself. 
-                available_observers = [a for a in population if a is not social_agent and a is not other]
-                observers = random.sample(available_observers, 4 if 4 < len(available_observers) else len(available_observers))
-
-                # print(f"Grooming {event_no} out group done by: {social_agent.name, other.name} is observed by: {[a.name for a in observers]}")
-
-                #-- add event to the memories of the observers
-                for observer in observers:
-                    observe(observer, event_no)
-
-                event_no += 1
-
-            else:
-                #-- the other agent wants to socialize in group so he rejects
-
-                # print(f'Agent: {other.name} rejects')
-
-                other.social_preference = 1
-                other.available = False
-
-                social_agent.available = False
-
-
-    else: 
-        #-- an agent plays save, and communicates with in group members. 
-
-        social_agent.social_preference = 1 #-- out group preference
-        
-        other = get_groom_participant(social_agent, population, False) #-- pick other agent
        
-        if other:
-            #-- there must be some agent out group before you can socialize with them
-            # print(f"in group grooming socializing agent: {social_agent.name} with agent: {other.name} from group: {other.groups[0]}")
-            preference = other.social_preference if other.social_preference !=0 else determine_preference(other)
-            # print(f'preference other: {preference}')
+        possible_participants = get_participants(social_agent, population, True, 2)
+        if possible_participants:
+            # print([agent.name for agent in possible_participants])
 
-            if preference == 1:
-                #-- the other agent also wants to socialize in group
-                # print(f'Agent: {other.name} accepts')
+            for other_agent in possible_participants:
+                
+                preference = other_agent.social_preference if other_agent.social_preference !=0 else determine_preference(other_agent)
+                # print(f'preference other: {preference}')
+                
+                if preference == 2:
+                    # print(f'agent: {other_agent.name} accepts')
+                    other_agent.social_preference = preference
 
-                other.social_preference = 1
+                    actual_participants.append(other_agent)
+                
+                else:
+                    #-- other agent does not want to gossip out group and rejects. 
+                    #-- preference of an agent should be stored for next possible events. 
 
-                #-- THE EVENT
-                social_agent.available = False
-                other.available = False
-                                
-                #-- Add the gossiping event itself to everyones memory and history 
-                add_event_to_mem([social_agent, other], [f'event_{event_no}'])
-                add_interaction_to_hist([social_agent, other])          
+                    # print(f'agent: {other_agent.name} rejects')
+                    other_agent.social_preference = preference
+                    other_agent.available = False
 
-                social_agent.groom_members_list.append(2)
-                other.groom_members_list.append(2)
+    else:
+        #-- the other agents are only from known groups. 
+        # print('in group grooming')
+        social_agent.social_preference = 1 #-- in group preference
 
-                #-- 4 observers can observe the event, however, if you are in the event you can not observe the event itself. 
-                available_observers = [a for a in population if a is not social_agent and a is not other]
-                observers = random.sample(available_observers, 4 if 4 < len(available_observers) else len(available_observers))
+        possible_participants = get_participants(social_agent, population, False, 2)
+        if possible_participants:
+            # print([agent.name for agent in possible_participants])
+            for other_agent in possible_participants:
+                
+                preference = other_agent.social_preference if other_agent.social_preference !=0 else determine_preference(other_agent)
+                # print(f'preference other: {preference}')
+                
+                if preference == 1:
+                    # print(f'agent: {other_agent.name} accepts')
+                    other_agent.social_preference = preference
 
-                # print(f"Grooming {event_no} in group done by: {social_agent.name, other.name} is observed by: {[a.name for a in observers]}")
+                    actual_participants.append(other_agent)
+                
+                else:
+                    #-- other agent does want to gossip out group and rejects. 
+                    #-- preference of an agent should be stored for next possible events. 
+                    # print(f'agent: {other_agent.name} rejects')
+                    other_agent.social_preference = preference
+                    other_agent.available = False
 
-                #-- add event to the memories of the observers
-                for observer in observers:
-                    observe(observer, event_no)
+    if actual_participants:
+        grooming_agents = [social_agent] + actual_participants
+        
+        #-- Add the gossiping event itself to everyones memory and history 
+        add_event_to_mem(grooming_agents, [f'event_{event_no}'])
+        add_interaction_to_hist(grooming_agents)
 
-                event_no += 1
+        #-- Make sure that none of the agents can engage in other social activities. 
+        for agent in grooming_agents:
+            agent.available = False
+            agent.groom_members_list.append(len(grooming_agents))
 
-            else:
-                #-- the other agent wants to socialize out group
+        #-- 4 observers can observe the event, however, if you are in the event you can not observe the event itself. 
+        available_observers = [a for a in population if a not in grooming_agents]
+        observers = random.sample(available_observers, 4 if 4 < len(available_observers) else len(available_observers))
 
-                # print(f'Agent: {other.name} rejects')
+        # print(f"grooming {event_no} done by: {[a.name for a in grooming_agents]} is observed by: {[a.name for a in observers]}")
 
-                other.social_preference = 2
-                other.available = False
+        #-- add event to the memories of the observers
+        for observer in observers:
+            observe(observer, event_no)
 
-                social_agent.available = False
+        event_no += 1
     
 def gossip(social_agent, population, out_group):
     #-- Gossiping is one-to-MANY with a maximum of 3 others. It is only possible if all agents are not active in another grooming or gossiping event.
@@ -197,7 +172,7 @@ def gossip(social_agent, population, out_group):
         #-- the other agents are only from other groups. 
         social_agent.social_preference = 2 #-- out group preference
        
-        possible_participants = get_gossip_participants(social_agent, population, True)
+        possible_participants = get_participants(social_agent, population, True, 3)
         if possible_participants:
             for other_agent in possible_participants:
                 preference = other_agent.social_preference if other_agent.social_preference !=0 else determine_preference(other_agent)
@@ -222,7 +197,7 @@ def gossip(social_agent, population, out_group):
 
         social_agent.social_preference = 1 #-- in group preference
 
-        possible_participants = get_gossip_participants(social_agent, population, False)
+        possible_participants = get_participants(social_agent, population, False, 3)
         if possible_participants:
             
             for other_agent in possible_participants:
@@ -301,7 +276,7 @@ def determine_preference(agent):
     #-- 0 undecided, 1 in group, 2 out group
     return 2 if random.uniform(0,1) < agent.tolerance else 1
 
-def get_gossip_participants(social_agent, population, out_group):
+def get_participants(social_agent, population, out_group, max_participants):
 
     if out_group:
         #-- from outside known groups
@@ -311,7 +286,7 @@ def get_gossip_participants(social_agent, population, out_group):
         available_agents = [agent for agent in population if any(group_number in agent.groups for group_number in social_agent.groups) and agent is not social_agent and agent.available]
 
     #-- determine with how many and with who the social agent will gossip. 
-    num_participants = random.randint(1,3)
+    num_participants = random.randint(1,max_participants)
     if num_participants > len(available_agents):
         num_participants = len(available_agents)
     if num_participants != 0:    
@@ -321,20 +296,6 @@ def get_gossip_participants(social_agent, population, out_group):
         return possible_participants
     else: 
         return []
-
-def get_groom_participant(social_agent, population, out_group):
-    if out_group:
-        available_agents = [agent for agent in population if not any(group_number in agent.groups for group_number in social_agent.groups) and agent.available]
-        # print(f'others: {[(a.name, a.groups) for a in available_agents]}')
-    else:
-        available_agents = [agent for agent in population if any(group_number in social_agent.groups for group_number in agent.groups) and agent is not social_agent and agent.available]
-        # print(f'others: {[(a.name, a.groups) for a in available_agents]}')
-
-    if available_agents:
-        other = random.choice(available_agents)
-        return other
-    else:
-        return None
      
 def get_group_values(groups):
     # print(groups)

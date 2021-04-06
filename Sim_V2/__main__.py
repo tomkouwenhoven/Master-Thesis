@@ -21,7 +21,7 @@ today = datetime.now()
 # dd/mm/YY
 date = today.strftime("%Y-%m-%dT%H:%M:%S") #-- %d-%m-%h-%m-%s
 
-SELECTION = False
+SELECTION = True
 GROUP_REJECTION = .4
 MUTATION_PROB = .05
 
@@ -247,7 +247,7 @@ def main(args = None):
     #-- all_generation_group_sizes is an array that contains the average group size of the entire population per generation. Each row represents a generation and each column is a round. 
     all_generations_group_sizes, generation_labels, group_sizes, average_gossip_probabilities, average_tolerance_probabilities, group_gossip_prob, group_tolerance_prob = run_all(args)
 
-    zipped_list = np.array(list(zip(generation_labels, all_generations_group_sizes)))
+    zipped_list = np.array(list(zip(generation_labels, all_generations_group_sizes)), dtype=object)
     zipped_phenotypes = np.array(list(zip(average_gossip_probabilities, average_tolerance_probabilities)))
     zipped_group_probabilities = np.array(list(zip(group_gossip_prob, group_tolerance_prob)))
     # run_all(args)
