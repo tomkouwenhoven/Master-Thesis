@@ -17,6 +17,8 @@ Provide arbitrary starting parameters in the following way:
 - ```--prosocial 0.2```
 - ```--ngroups 5``` (Make sure that it can equally devide the number of agents)
 - ```--ngenerations 1```
+- ```--groomagents 2```
+- ```--gossipagents 3```
 
 Or run ```python __main__.py --help``` to see the options available.
 
