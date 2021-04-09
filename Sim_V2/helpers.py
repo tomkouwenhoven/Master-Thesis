@@ -66,7 +66,7 @@ def regroup_agents(args, population, groups, GROUP_REJECTION):
                 agent.groups.remove(remove_group) #-- remove from agent's personal list
                 del agent.history[remove_group] #-- remove from agent's history
 
-def groom(social_agent, population, out_group):
+def groom(social_agent, population, out_group, max_invited):
     #-- Grooming is one-to-ONE and is only possible if both agents are not active in another grooming or gossiping event.
     #-- This function takes a social agent, the population and the fact whether an agent socializes out group or in group. 
     #-- It first determines if there are agents to groom, out or in group. Then adds the event to the memories, lastly it updates the encounters with groups. 
@@ -84,7 +84,7 @@ def groom(social_agent, population, out_group):
         #-- the other agents are only from other groups. 
         social_agent.social_preference = 2 #-- out group preference
        
-        possible_participants = get_participants(social_agent, population, True, 2)
+        possible_participants = get_participants(social_agent, population, True, max_invited)
         if possible_participants:
             # print([agent.name for agent in possible_participants])
 
@@ -112,7 +112,7 @@ def groom(social_agent, population, out_group):
         # print('in group grooming')
         social_agent.social_preference = 1 #-- in group preference
 
-        possible_participants = get_participants(social_agent, population, False, 2)
+        possible_participants = get_participants(social_agent, population, False, max_invited)
         if possible_participants:
             # print([agent.name for agent in possible_participants])
             for other_agent in possible_participants:
@@ -157,7 +157,7 @@ def groom(social_agent, population, out_group):
 
         event_no += 1
     
-def gossip(social_agent, population, out_group):
+def gossip(social_agent, population, out_group, max_invited):
     #-- Gossiping is one-to-MANY with a maximum of 3 others. It is only possible if all agents are not active in another grooming or gossiping event.
     
     global event_no
