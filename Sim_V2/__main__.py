@@ -18,24 +18,23 @@ import os
 path = getcwd()
 today = datetime.now()
 
-# dd/mm/YY
 date = today.strftime("%Y-%m-%dT%H:%M:%S") #-- %d-%m-%h-%m-%s
 
-SELECTION = False
+SELECTION = True
 GROUP_REJECTION = .4
 MUTATION_PROB = .05
 
-def socialize(social_agent, population, out_group):
+def socialize(social_agent, population, out_group, args):
     # print()
     
     #-- determine whether the social agents wants to groom or gossip
     if random.uniform(0,1) < social_agent.gossip_prob:
         #-- agent wants to be groom
-        gossip(social_agent, population, out_group)
+        gossip(social_agent, population, out_group, args.gossipagents)
 
     else:
         #-- agent wants to be gossip
-        groom(social_agent, population, out_group)
+        groom(social_agent, population, out_group, args.groomagents)
 
 def run_round(args, population, groups):
     #-- runs a single round where agents can engage with each other.     
@@ -43,10 +42,10 @@ def run_round(args, population, groups):
         if agent.available: #-- an agents can only socialize when he is not already socializing. 
             if random.uniform(0,1) < agent.tolerance or agent.social_preference == 2:
                 #-- socialize out group
-                socialize(social_agent = agent, population = population, out_group = True)
+                socialize(social_agent = agent, population = population, out_group = True, args = args)
             else:
                 #-- socialize in group
-                socialize(social_agent = agent, population = population, out_group = False)
+                socialize(social_agent = agent, population = population, out_group = False, args = args)
     
     regroup_agents(args, population, groups, GROUP_REJECTION) #-- checks for each agent their INTERNAL history and updates to which groups he belongs
     groups = split_to_groups(args, population) #-- checks the GENERAL groups in the population
@@ -161,75 +160,6 @@ def run_all(args):
 
     return np.array(all_generations_group_sizes), np.array(gen_numbers), np.array(group_sizes), np.array(avg_gossip_probs), np.array(avg_tolerance_probs), np.array(group_by_generation_gp), np.array(group_by_generation_tol)
 
-    #-- plotting the results
-'''
-    c = plt.get_cmap('tab20') #-- get colormap 
-
-    fig, axs = plt.subplots(3,2, figsize=(15, 10))
-
-    #-- plot the average generation groups size in a single line
-    for i, line in enumerate(all_generations_group_sizes):
-        axs[0][0].plot(line, label=f'gen{gen_numbers[i]}', color=c((1/args.ngroups)*i)) #-- make sure that each line is matched and different from the rest
-
-    axs[0][0].set_title(f"Average group size per generation")
-    axs[0][0].set_xlabel("Rounds")
-    axs[0][0].set_ylabel("Number of agents")
-    axs[0][0].set_xlim(0, args.nrounds)
-    axs[0][0].grid()
-    axs[0][0].legend(bbox_to_anchor=(1.01,1), loc="upper left")
-    
-    #-- plot the average gossip and tolerance probability. 
-    axs[1][0].set_title(f"Average gossip & Tolerance")
-    axs[1][0].plot(avg_gossip_probs, label = "gossip probability")
-    axs[1][0].plot(avg_tolerance_probs, label = "tolerance")
-    axs[1][0].set_xlabel("Generations")
-    axs[1][0].set_ylim(0, 1)
-    axs[1][0].set_xlim(0, args.generations)
-    axs[1][0].set_ylabel("Probability")
-    axs[1][0].grid()
-    axs[1][0].legend(bbox_to_anchor=(1.01,1), loc="upper left")
-
-    #-- plot the course of the last generations' group sizes
-    for i, line in enumerate(group_sizes):
-        axs[0][1].plot(line, label=i, color=c((1/args.ngroups)*i))
-    axs[0][1].set_ylabel("Number of agents")
-    axs[0][1].set_xlabel("Rounds")
-    axs[0][1].set_title(f"Group size last generation")
-    axs[0][1].set_xlim(0, args.nrounds)
-    axs[0][1].grid()
-    axs[0][1].legend(bbox_to_anchor=(1.01,1), ncol=2, loc="upper left")
-
-    #-- plot per group average gossip probability
-    for i, line in enumerate(group_by_generation_gp):
-        axs[2][0].plot(line, label=i, color=c((1/args.ngroups)*i))
-    # axs[1][1].set_ylabel("Prabability")
-    axs[2][0].set_ylim(0, 1)
-    axs[2][0].set_xlim(0, args.generations)
-    axs[2][0].set_xlabel("Generations")
-    axs[2][0].set_ylabel("Probability")
-    axs[2][0].set_title(f"Gossip probability per group")
-    axs[2][0].grid()
-    axs[2][0].legend(bbox_to_anchor=(1.01,1), ncol=2, loc="upper left")
-
-    #-- plot per group average tolerance
-    for i, line in enumerate(group_by_generation_tol):
-        axs[2][1].plot(line, label=i, color=c((1/args.ngroups)*i))
-    # axs[1][2].set_ylabel("Prabability")
-    axs[2][1].set_ylim(0, 1)
-    axs[2][1].set_xlim(0, args.generations)
-    axs[2][1].set_xlabel("Generations")
-    axs[2][1].set_ylabel("Probability")
-    axs[2][1].set_title(f"Tolerance per group")
-    axs[2][1].grid()
-    axs[2][1].legend(bbox_to_anchor=(1.01,1), ncol=2, loc="upper left")
-
-    #-- postprocess and save plots
-    fig.suptitle(f'Agents: {args.nagents}, Groups: {args.ngroups}, Selection: {SELECTION}, Mutation prob: {MUTATION_PROB}, Rejection: {GROUP_REJECTION}')
-    plt.subplots_adjust(bottom=0.075, left=0.05, right=0.85, wspace=0.50, hspace=0.40, top=0.9)
-    plt.savefig(f'{path}/output/plots/{date}-{args.nagents}-{args.ngroups}-{args.nrounds}-{args.generations}-{str(args.tolerance).replace(".", "")}-{str(args.gossipprob).replace(".", "")}-{SELECTION}')
-    plt.show()
-'''    
-
 def main(args = None):
     #-- This part runs when the code starts, it parses the arguments given. 
     print("Running simulation..")
@@ -241,18 +171,20 @@ def main(args = None):
     parser.add_argument('--ngroups', '-ng', type = int, dest = 'ngroups', help = 'The starting number of groups', default = 5)
     parser.add_argument('--generations', '-g', type = int, dest = 'generations', help ='The number of generations', default = 3)
     parser.add_argument('--nrounds', '-nr', type = int, dest = 'nrounds', help ='The number rounds for each generation', default = 5)
+    parser.add_argument('--groomagents', '-grooma', type = int, dest = 'groomagents', help='The number of agents one can invite to groom', default = 1)
+    parser.add_argument('--gossipagents', '-gossipa', type = int, dest = 'gossipagents', help='The number of agents one can invite to gossip', default = 3)
     args = parser.parse_args()
         
     #-- run the simulation      
     #-- all_generation_group_sizes is an array that contains the average group size of the entire population per generation. Each row represents a generation and each column is a round. 
     all_generations_group_sizes, generation_labels, group_sizes, average_gossip_probabilities, average_tolerance_probabilities, group_gossip_prob, group_tolerance_prob = run_all(args)
 
-    zipped_list = np.array(list(zip(generation_labels, all_generations_group_sizes)))
+    zipped_list = np.array(list(zip(generation_labels, all_generations_group_sizes)), dtype=object)
     zipped_phenotypes = np.array(list(zip(average_gossip_probabilities, average_tolerance_probabilities)))
     zipped_group_probabilities = np.array(list(zip(group_gossip_prob, group_tolerance_prob)))
     # run_all(args)
 
-    newpath = path + '/output/data/' + f'{args.nagents}-{args.ngroups}-{args.nrounds}-{args.generations}-{str(args.tolerance).replace(".", "")}-{str(args.gossipprob).replace(".", "")}-{SELECTION}'
+    newpath = path + '/output/data/' + f'{args.nagents}-{args.ngroups}-{args.nrounds}-{args.generations}-{str(args.tolerance).replace(".", "")}-{str(args.gossipprob).replace(".", "")}-{SELECTION}-{args.groomagents}-{args.gossipagents}'
     if not os.path.exists(newpath):
         os.makedirs(newpath)
 
