@@ -5,12 +5,14 @@ import numpy as np
 import random
 import matplotlib.pyplot as plt
 
-import sys
+import sys, os
 import argparse
 
 n_rounds = 30
 n_generations = int(sys.argv[1])
 mutation_prob = .01
+
+PATH = os.getcwd()
 
 # go_probabilities = np.full(num_agents, .1, dtype=float)
 # print(go_probabilities)
@@ -108,8 +110,8 @@ def run_group(size):
 
 groups_last_prob = []
 all_groups_generation_probs = []
-group_sizes = [10, 50, 100, 130, 190]
-# group_sizes = range(2,200)
+# group_sizes = [10, 50, 100, 130, 190]
+group_sizes = range(2,200)
 for i, size in enumerate(group_sizes):
     print(f'Group: {size}', sep=' ', end='\r')
     last_go_prob_group, group_generation_probs = run_group(size)
@@ -125,27 +127,28 @@ for i, size in enumerate(group_sizes):
 
 
 #-- plotting of gossip probability per group
-# fig = plt.figure()
-# plt.plot(groups_last_prob, 'bx')
-# plt.ylabel("Mean Gossip Probability")
-# plt.xlabel("Group size")
-# plt.title(f"Average gossip probability per group, mutation prob:{mutation_prob}")
-# plt.grid()
-# # plt.legend()
-# plt.savefig(f'/Users/Tom/Desktop/Thesis/Slingerland_Sim/output/05-05_avg_gp_global{mutation_prob}-{n_generations}.png')
+fig = plt.figure()
+plt.plot(groups_last_prob, 'bx')
+plt.ylabel("Mean Gossip Probability")
+plt.xlabel("Group size")
+plt.title(f"Average gossip probability per group, mutation prob:{mutation_prob}")
+plt.grid()
+# plt.legend()
+plt.savefig(f'{PATH}/output/05-05_avg_gp_global{mutation_prob}-{n_generations}.png')
 # plt.show()
 
 # #-- Plotting of course of gossip probabilities
+line_group_sizes = [10, 50, 100, 130, 190]
 fig = plt.figure()
-for i, line in enumerate(all_groups_generation_probs):
-    plt.plot(line, label = group_sizes[i])
+for i, line in enumerate([all_groups_generation_probs[j] for j in line_group_sizes]):
+    plt.plot(line, label = line_group_sizes[i])
 plt.ylabel("Mean Gossip Probability")
 plt.xlabel("Generation")
 plt.title(f"Average gossip probability per group, mutation prob:{mutation_prob}")
 plt.grid()
 plt.legend()
-plt.savefig(f'/Users/Tom/Desktop/Thesis/Slingerland_Sim/output/05-05_avg_gp_persize-{mutation_prob}-{n_generations}.png')
-plt.show()
+plt.savefig(f'{PATH}/output/05-05_avg_gp_persize-{mutation_prob}-{n_generations}.png')
+# plt.show()
 
 
 
