@@ -4,7 +4,7 @@ import random
 class Agent:
     #-- Agent class, with two main variables: gossip probability and prosocial 
 
-    def __init__(self, _name, _tolerance, _groups, _gossip_prob):
+    def __init__(self, _name, _tolerance, _groups, _gossip_prob, _gossip_effect, _groom_effect):
         self.name = _name
         self.tolerance = _tolerance
         self.history = {}
@@ -18,6 +18,9 @@ class Agent:
         self.gossip_members_list = []
         self.groom_members_list = []
         
+        self.gossip_effect = _gossip_effect
+        self.groom_effect = _groom_effect
+
         self.social_fitness = 0
         self.info_fitness = 0 
         self.fitness = 0
@@ -38,7 +41,7 @@ class Agent:
         for go_event in self.gossip_members_list:
             sum_go_fitness += self.func(go_event)
 
-        self.social_fitness = (5 * sum_gr_fitness) + (4 * sum_go_fitness)
+        self.social_fitness = (self.groom_effect * sum_gr_fitness) + (self.gossip_effect * sum_go_fitness)
 
     def func(self, n_people):
         return 1 / (n_people - 1)

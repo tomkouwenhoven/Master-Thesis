@@ -16,6 +16,7 @@ from os import getcwd
 import os
 
 path = getcwd()
+print(path)
 today = datetime.now()
 
 date = today.strftime("%Y-%m-%dT%H:%M:%S") #-- %d-%m-%h-%m-%s
@@ -57,12 +58,12 @@ def generate_population(args, new_phenotypes, new_sim):
 
     if new_sim:
         for i in range(args.nagents):
-            population.append(Agent(_name = i, _tolerance = args.tolerance, _groups = (i % args.ngroups), _gossip_prob = args.gossipprob))
+            population.append(Agent(_name = i, _tolerance = args.tolerance, _groups = (i % args.ngroups), _gossip_prob = args.gossipprob, _gossip_effect = args.gossipeffect, _groom_effect = args.groomeffect))
 
     else:
         groups_phenotypes, ps_phenotypes, go_phenotypes = list(zip(*new_phenotypes))
         for i in range(args.nagents):
-            population.append(Agent(_name = i, _tolerance = ps_phenotypes[i], _groups = groups_phenotypes[i],  _gossip_prob = go_phenotypes[i]))
+            population.append(Agent(_name = i, _tolerance = ps_phenotypes[i], _groups = groups_phenotypes[i],  _gossip_prob = go_phenotypes[i], _gossip_effect = args.gossipeffect, _groom_effect = args.groomeffect))
 
         # print([a.groups for a in population])
     groups = split_to_groups(args, population)
@@ -173,6 +174,8 @@ def main(args = None):
     parser.add_argument('--nrounds', '-nr', type = int, dest = 'nrounds', help ='The number rounds for each generation', default = 5)
     parser.add_argument('--groomagents', '-grooma', type = int, dest = 'groomagents', help='The number of agents one can invite to groom', default = 1)
     parser.add_argument('--gossipagents', '-gossipa', type = int, dest = 'gossipagents', help='The number of agents one can invite to gossip', default = 3)
+    parser.add_argument('--gossipeffect', '-gossipe', type = int, dest = 'gossipeffect', help='The effectiveness of a gossiping event on social fitness', default = 4)
+    parser.add_argument('--groomeffect', '-groome', type = int, dest = 'groomeffect', help='The effectiveness of a grooming event on social fitness', default = 5)
     args = parser.parse_args()
         
     #-- run the simulation      
@@ -184,8 +187,10 @@ def main(args = None):
     zipped_group_probabilities = np.array(list(zip(group_gossip_prob, group_tolerance_prob)))
     # run_all(args)
 
-    newpath = path + '/output/data/' + f'{args.nagents}-{args.ngroups}-{args.nrounds}-{args.generations}-{str(args.tolerance).replace(".", "")}-{str(args.gossipprob).replace(".", "")}-{SELECTION}-{args.groomagents}-{args.gossipagents}'
+    # newpath = path + '/output/gridsearch/' + f'{args.nagents}-{args.ngroups}-{args.nrounds}-{args.generations}-{str(args.tolerance).replace(".", "")}-{str(args.gossipprob).replace(".", "")}-{SELECTION}-{args.groomagents}-{args.gossipagents}'
+    newpath = path + '/output/gridsearch/' + f'{args.gossipeffect}-{args.groomeffect}'
     if not os.path.exists(newpath):
+        print(f"create path: {newpath}")
         os.makedirs(newpath)
 
     np.save(f'{newpath}/{date}-avg-groupsize-over-pop.npy', zipped_list) #--saves the average group size of the ENTIRE population for each round in a generation
