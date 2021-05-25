@@ -19,7 +19,7 @@ path = getcwd()
 print(path)
 today = datetime.now()
 
-date = today.strftime("%Y-%m-%dT%H:%M:%S") #-- %d-%m-%h-%m-%s
+date = today.strftime("%Y-%m-%dT%H-%M-%S") #-- %d-%m-%h-%m-%s
 
 SELECTION = True
 GROUP_REJECTION = .4
