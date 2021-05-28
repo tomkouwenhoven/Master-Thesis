@@ -286,7 +286,8 @@ def get_participants(social_agent, population, out_group, max_participants):
         available_agents = [agent for agent in population if any(group_number in agent.groups for group_number in social_agent.groups) and agent is not social_agent and agent.available]
 
     #-- determine with how many and with who the social agent will gossip. 
-    num_participants = random.randint(1,max_participants)
+    # num_participants = random.randint(1,max_participants)
+    num_participants = max_participants
     if num_participants > len(available_agents):
         num_participants = len(available_agents)
     if num_participants != 0:    
