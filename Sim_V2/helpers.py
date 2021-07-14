@@ -172,7 +172,7 @@ def gossip(social_agent, population, out_group, max_invited):
         #-- the other agents are only from other groups. 
         social_agent.social_preference = 2 #-- out group preference
        
-        possible_participants = get_participants(social_agent, population, True, 3)
+        possible_participants = get_participants(social_agent, population, True, max_invited)
         if possible_participants:
             for other_agent in possible_participants:
                 preference = other_agent.social_preference if other_agent.social_preference !=0 else determine_preference(other_agent)
@@ -197,7 +197,7 @@ def gossip(social_agent, population, out_group, max_invited):
 
         social_agent.social_preference = 1 #-- in group preference
 
-        possible_participants = get_participants(social_agent, population, False, 3)
+        possible_participants = get_participants(social_agent, population, False, max_invited)
         if possible_participants:
             
             for other_agent in possible_participants:
