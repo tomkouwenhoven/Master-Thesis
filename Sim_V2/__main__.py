@@ -188,7 +188,7 @@ def main(args = None):
     # run_all(args)
 
     # newpath = path + '/output/gridsearch/' + f'{args.nagents}-{args.ngroups}-{args.nrounds}-{args.generations}-{str(args.tolerance).replace(".", "")}-{str(args.gossipprob).replace(".", "")}-{SELECTION}-{args.groomagents}-{args.gossipagents}'
-    newpath = path + '/output/gridsearch/' + f'{args.gossipeffect}-{args.groomeffect}'
+    newpath = path + '/output/' + f'effectiveness-go-{args.gossipeffect}-gr-{args.groomeffect}-social_agents-go-{args.gossipagents}-gr-{args.groomagents}'
     if not os.path.exists(newpath):
         print(f"create path: {newpath}")
         os.makedirs(newpath)

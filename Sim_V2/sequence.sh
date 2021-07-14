@@ -1,46 +1,20 @@
+for i in {1..40}
+do 
+    echo "Running with simuluation: $i from gossipeffect 4 and groomingeffect 5 and grooming with 1 other and gossip with up to 3 others"
+    python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 1 --gossipagents 3 --gossipeffect 4 --groomeffect 5
 
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 3 --gossipagents 3
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
+done 
 
+for i in {1..40}
+do 
+    echo "Running with simuluation: $i from gossipeffect 4 and groomingeffect 5 and grooming with 1 other and gossip with up to 3 others"
+    python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2 --gossipeffect 4 --groomeffect 5
 
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 3 --gossipagents 3
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
+done 
 
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 3 --gossipagents 3
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
+for i in {1..40}
+do 
+    echo "Running with simuluation: $i from gossipeffect 4 and groomingeffect 5 and grooming with 1 other and gossip with up to 3 others"
+    python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2 --gossipeffect 1 --groomeffect 5
 
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 3 --gossipagents 3
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-python __main__.py --nagents 100 --ngroups 20 --nrounds 75 --generations 125 --groomagents 2 --gossipagents 2
-
+done 
