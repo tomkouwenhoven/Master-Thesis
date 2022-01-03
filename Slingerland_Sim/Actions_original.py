@@ -46,16 +46,14 @@ def gossip(social_agent, group, event_name):
         available_participants = [a for a in group if not(a.groom or a.gossip) and a is not social_agent]
         
         #-- determine with how many and with who the social agent will gossip. 
-        
-        if available_participants:
-            other_agent = random.choice(available_participants)
+        num_participants = random.randint(1,3)
         # num_participants = random.randint(1,3) #-- ORIGINEEL
-        # if num_participants > len(available_participants):
-        #     num_participants = len(available_participants)
-        # if num_participants != 0:    
-        #     participants = random.sample(available_participants, num_participants)
-        #     # print(f'social agent: {social_agent.name} with gossipers:{[a.name for a in participants]}')
-            gossiping_agents = [social_agent] + [other_agent]
+        if num_participants > len(available_participants):
+            num_participants = len(available_participants)
+        if num_participants != 0:    
+            participants = random.sample(available_participants, num_participants)
+            # print(f'social agent: {social_agent.name} with gossipers:{[a.name for a in participants]}')
+            gossiping_agents = [social_agent] + participants
             
             #-- Pick gossiping agent and share memory
             info_agent = random.choice(gossiping_agents)
