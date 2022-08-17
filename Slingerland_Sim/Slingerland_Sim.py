@@ -1,5 +1,5 @@
 from Agent import Agent
-from Actions_original import groom, gossip, observe, reproduce, select_fittest
+from Actions import groom, gossip, observe, reproduce, select_fittest
 
 import numpy as np
 import random
@@ -134,7 +134,7 @@ plt.xlabel("Group size")
 plt.title(f"Average gossip probability per group, mutation prob:{mutation_prob}")
 plt.grid()
 # plt.legend()
-plt.savefig(f'{PATH}/output/05-05_avg_gp_global{mutation_prob}-{n_generations}.png')
+plt.savefig(f'{PATH}/output/test/CogSci -- original model/05-05_avg_gp_global{mutation_prob}-{n_generations}.png')
 # plt.savefig(f'{PATH}/output/test/05-05_avg_gp_global{mutation_prob}-{n_generations}.png')
 # plt.show()
 
@@ -149,7 +149,7 @@ plt.title(f"Average gossip probability per group, mutation prob:{mutation_prob}"
 plt.grid()
 plt.legend()
 # plt.savefig(f'{PATH}/output/test/05-05_avg_gp_persize-{mutation_prob}-{n_generations}.png')
-plt.savefig(f'{PATH}/output/05-05_avg_gp_persize-{mutation_prob}-{n_generations}.png')
+plt.savefig(f'{PATH}/output/test/CogSci -- original model/05-05_avg_gp_persize-{mutation_prob}-{n_generations}.png')
 # plt.show()
 
 
