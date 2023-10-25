@@ -47,5 +47,5 @@ toml==0.10.2
 tornado==6.3.3
 traitlets==5.0.5
 wcwidth==0.2.5
-Werkzeug==2.2.3
+Werkzeug==3.0.1
 wsproto==1.0.0
